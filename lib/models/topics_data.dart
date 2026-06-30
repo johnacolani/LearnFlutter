@@ -295,6 +295,133 @@ React Native: native component mapping""",
     ],
   ),
   Topic(
+    id: r"""dev_commands""",
+    label: r"""Flutter CLI / Dev Commands""",
+    icon: r"""???""",
+    colorValue: 0xFF2B6CB0,
+    sections: [
+      LevelSection(
+        level: r"""mid""",
+        title: r"""Daily Development""",
+        points: [
+          ConceptPoint(
+            question: r"""flutter doctor""",
+            explanation:
+                r"""Use flutter doctor when setting up a machine or when builds suddenly fail because of environment problems. It checks Flutter, Dart, Android toolchain, Xcode, connected devices, Chrome, Visual Studio, and IDE plugins. A real example is a Windows developer who cannot build desktop because Visual Studio C++ tools are missing; flutter doctor points directly to that setup issue.""",
+            code: r"""flutter doctor
+flutter doctor -v""",
+          ),
+          ConceptPoint(
+            question: r"""flutter pub get / upgrade / outdated""",
+            explanation:
+                r"""These commands manage dependencies. flutter pub get downloads the versions locked by pubspec.lock. flutter pub outdated shows which packages have newer versions and whether constraints block upgrades. flutter pub upgrade updates dependencies within allowed constraints. In a team, pubspec.yaml defines what is allowed, while pubspec.lock keeps everyone on the same resolved versions for apps.""",
+            code: r"""flutter pub get
+flutter pub outdated
+flutter pub upgrade""",
+          ),
+          ConceptPoint(
+            question: r"""flutter analyze""",
+            explanation:
+                r"""flutter analyze runs static analysis using analysis_options.yaml. It catches compile-time mistakes, invalid imports, type issues, unused code, deprecated APIs, and lint violations before runtime. A good workflow is to run it before every commit or in CI, because it catches problems faster than launching the app manually.""",
+            code: r"""flutter analyze
+flutter analyze lib test""",
+          ),
+          ConceptPoint(
+            question: r"""flutter test""",
+            explanation:
+                r"""flutter test runs unit tests and widget tests. Use it to verify business logic, state management, widgets, and regressions. For example, after changing login error handling, write a Bloc/Riverpod/provider test that expects Loading then Failure, and a widget test that verifies the error message is visible.""",
+            code: r"""flutter test
+flutter test test/auth/login_test.dart
+flutter test --coverage""",
+          ),
+          ConceptPoint(
+            question: r"""flutter run""",
+            explanation:
+                r"""flutter run launches the app on a device, emulator, simulator, browser, or desktop target. In debug mode it supports hot reload and hot restart. Use -d to pick a device, --flavor for app variants, and --dart-define for environment values such as API URLs or feature flags.""",
+            code: r"""flutter devices
+flutter run -d windows
+flutter run -d chrome
+flutter run --flavor dev --dart-define=API_URL=https://dev.example.com""",
+          ),
+          ConceptPoint(
+            question: r"""Hot reload vs hot restart""",
+            explanation:
+                r"""Hot reload injects code changes and keeps current app state, which is perfect for UI tweaks. Hot restart restarts the Dart isolate and resets app state, which is better when initState, dependency injection, global variables, or app startup logic changed. Full stop/start is needed for native platform changes, Gradle changes, Info.plist, AndroidManifest, plugins, or generated native code.""",
+            code: r"""Hot reload: keep state
+Hot restart: reset Dart state
+Full rebuild: native/config/plugin changes""",
+          ),
+        ],
+      ),
+      LevelSection(
+        level: r"""senior""",
+        title: r"""Build and Release""",
+        points: [
+          ConceptPoint(
+            question: r"""flutter build""",
+            explanation:
+                r"""flutter build creates release artifacts. The target depends on platform: apk or appbundle for Android, ipa for iOS, web for browser deployment, windows/macos/linux for desktop. A senior developer knows debug builds are not performance proof; use profile or release builds to evaluate startup time, animation performance, size, and platform behavior.""",
+            code: r"""flutter build apk --release
+flutter build appbundle --release
+flutter build ipa --release
+flutter build web --release
+flutter build windows --release""",
+          ),
+          ConceptPoint(
+            question: r"""Build modes: debug, profile, release""",
+            explanation:
+                r"""Debug mode is for development and hot reload, but it has extra checks and is slower. Profile mode is for measuring performance with DevTools while still keeping observability. Release mode is optimized for users. If an interviewer asks about performance, say you do not judge jank from debug mode; you measure profile or release on a real device.""",
+            code: r"""flutter run --debug
+flutter run --profile
+flutter run --release""",
+          ),
+          ConceptPoint(
+            question: r"""flutter clean""",
+            explanation:
+                r"""flutter clean removes generated build outputs. Use it when cached generated files or platform builds are stale, such as after changing plugins, Gradle config, CocoaPods, desktop CMake files, or generated registrants. Do not use it as a first solution for every error because it makes the next build slower; use it when cache/stale output is a reasonable suspect.""",
+            code: r"""flutter clean
+flutter pub get
+flutter run""",
+          ),
+          ConceptPoint(
+            question: r"""flutter channel / upgrade / downgrade""",
+            explanation:
+                r"""flutter channel selects the Flutter SDK release stream, such as stable, beta, or master. Most production apps should stay on stable. flutter upgrade updates the SDK on the current channel. flutter downgrade returns to the previous installed version when a new SDK breaks the project. In teams, pinning Flutter with FVM or documented SDK versions avoids 'works on my machine' problems.""",
+            code: r"""flutter channel
+flutter channel stable
+flutter upgrade
+flutter downgrade""",
+          ),
+          ConceptPoint(
+            question: r"""Devices, emulators, and logs""",
+            explanation:
+                r"""flutter devices lists available targets. flutter emulators lists configured emulators and can launch one. flutter logs streams logs from a connected device, useful when the app is already installed or when debugging startup/crash behavior. For Android-specific logs, adb logcat is still useful; for iOS, Xcode console can show native-side details.""",
+            code: r"""flutter devices
+flutter emulators
+flutter emulators --launch Pixel_8
+flutter logs""",
+          ),
+          ConceptPoint(
+            question: r"""DevTools and performance commands""",
+            explanation:
+                r"""Flutter DevTools is used for performance, memory, network, logging, widget rebuilds, and inspector workflows. You usually open it from the IDE or from the run output. For deeper performance work, run in profile mode on a real device, reproduce the jank, record the timeline, and inspect expensive build/layout/paint/raster work.""",
+            code: r"""flutter run --profile
+# open DevTools from IDE or run output
+# inspect Performance, Memory, Network, Logging""",
+          ),
+          ConceptPoint(
+            question: r"""Code generation commands""",
+            explanation:
+                r"""Many Flutter projects use build_runner for generated code: json_serializable, freezed, retrofit, injectable, drift, and other generators. Use build when you want a one-time generation and watch during active development. If generated files conflict, delete conflicting outputs with the provided flag rather than manually editing generated files.""",
+            code: r"""dart run build_runner build
+dart run build_runner build --delete-conflicting-outputs
+dart run build_runner watch --delete-conflicting-outputs""",
+          ),
+        ],
+      ),
+    ],
+  ),
+  Topic(
     id: r"""wer""",
     label: r"""Widget / Element / RenderObject""",
     icon: r"""🧩""",
@@ -1178,6 +1305,422 @@ runApp(const FlutterInterviewPrepApp());""",
             explanation:
                 r"""4iCAD is my strongest project because it combines product design, CAD domain knowledge, Flutter rendering, performance optimization, and cross-platform architecture. It shows that I can think beyond screens and solve complex workflow problems.""",
             code: r"""Lead story: domain + product + engineering""",
+          ),
+        ],
+      ),
+    ],
+  ),
+  Topic(
+    id: r"""app_optimization""",
+    label: r"""App Optimization""",
+    icon: r"""OPT""",
+    colorValue: 0xFF00A3C4,
+    sections: [
+      LevelSection(
+        level: r"""mid""",
+        title: r"""Performance Foundations""",
+        points: [
+          ConceptPoint(
+            question: r"""What does app optimization mean in Flutter?""",
+            explanation:
+                r"""App optimization means making the app feel fast, stable, and efficient for real users. In Flutter, that includes startup time, smooth scrolling, avoiding unnecessary rebuilds, reducing memory use, keeping network and database work off the critical UI path, and measuring performance instead of guessing. A good interview answer should mention that optimization starts with profiling, because changing code without measurement can waste time or even make performance worse.""",
+            code: r"""Optimization loop:
+measure -> find bottleneck -> improve -> measure again""",
+          ),
+          ConceptPoint(
+            question: r"""How do you reduce unnecessary rebuilds?""",
+            explanation:
+                r"""A rebuild is not automatically bad, but rebuilding large widget trees too often can cause jank. Keep state close to where it is used, split large widgets into smaller widgets, use const constructors when possible, and avoid putting frequently changing state at the top of the screen if only one small part needs to change. With Provider, Bloc, or Riverpod, select only the piece of state the widget needs.""",
+            code: r"""Bad: whole page listens to timer changes
+Good: only TimerText listens and rebuilds""",
+          ),
+          ConceptPoint(
+            question: r"""How do you optimize lists and images?""",
+            explanation:
+                r"""For long lists, use lazy builders such as ListView.builder or SliverList so Flutter creates only visible rows. Avoid expensive work inside itemBuilder. For images, use correct sizes, caching, placeholders, and avoid loading huge original images when a thumbnail is enough. In production apps, image and list performance often matters more than micro-optimizing small widgets.""",
+            code: r"""ListView.builder(
+  itemCount: items.length,
+  itemBuilder: (_, index) => ItemTile(items[index]),
+);""",
+          ),
+          ConceptPoint(
+            question: r"""When should you use isolates?""",
+            explanation:
+                r"""Flutter UI runs on the main isolate. Heavy CPU work like parsing a very large JSON file, image processing, encryption, compression, or CAD geometry calculations can block frames if it runs on the UI isolate. Move heavy CPU work to an isolate with compute or Isolate.run. Do not use isolates for simple API calls, because async I/O already avoids blocking the UI thread.""",
+            code:
+                r"""final result = await Isolate.run(() => parseLargeFile(bytes));""",
+          ),
+        ],
+      ),
+      LevelSection(
+        level: r"""senior""",
+        title: r"""Profiling and Production Performance""",
+        points: [
+          ConceptPoint(
+            question: r"""How do you investigate jank?""",
+            explanation:
+                r"""Jank means frames are missing the device frame budget, usually 16 ms for 60 FPS. Use Flutter DevTools Performance view, run in profile mode, inspect frame charts, and separate UI thread work from raster thread work. If the UI thread is busy, look for rebuilds, layouts, parsing, or synchronous work. If the raster thread is busy, look for expensive painting, shadows, clipping, opacity layers, or too much overdraw.""",
+            code: r"""flutter run --profile
+DevTools -> Performance -> record frame chart""",
+          ),
+          ConceptPoint(
+            question: r"""How do you improve startup time?""",
+            explanation:
+                r"""Startup optimization means doing only necessary work before the first screen. Avoid loading all data, all services, and all heavy assets before runApp or before the first frame. Show a fast initial shell, then load secondary data after the first frame. Use lazy initialization for non-critical services and keep splash/startup logic simple.""",
+            code: r"""runApp(const AppShell());
+WidgetsBinding.instance.addPostFrameCallback((_) {
+  loadNonCriticalData();
+});""",
+          ),
+          ConceptPoint(
+            question: r"""How do you optimize rendering-heavy apps like CAD?""",
+            explanation:
+                r"""For drawing-heavy apps, optimize at the rendering architecture level. Separate static layers from interactive overlays, cache expensive paths, repaint only what changed, avoid rebuilding the full scene during pointer movement, and use spatial indexes for hit testing. For 4iCAD, this means the canvas should not recalculate every entity on every drag if only the cursor or selected object changed.""",
+            code: r"""Static drawing layer -> cached
+Selection overlay -> repaints often
+Spatial index -> fast hit testing""",
+          ),
+          ConceptPoint(
+            question:
+                r"""What is the senior answer for performance trade-offs?""",
+            explanation:
+                r"""A senior answer explains trade-offs. Caching improves speed but uses memory and can become stale. Splitting widgets improves rebuild control but can make the tree harder to follow. Isolates prevent UI blocking but add serialization cost. The right decision depends on measurement, user impact, device class, and complexity cost.""",
+            code:
+                r"""Performance decision = user impact + measurement + complexity cost""",
+          ),
+        ],
+      ),
+    ],
+  ),
+  Topic(
+    id: r"""app_security""",
+    label: r"""App Security""",
+    icon: r"""SEC""",
+    colorValue: 0xFFE53E3E,
+    sections: [
+      LevelSection(
+        level: r"""mid""",
+        title: r"""Secure App Basics""",
+        points: [
+          ConceptPoint(
+            question: r"""What does mobile app security mean?""",
+            explanation:
+                r"""Mobile app security means protecting users, data, APIs, and business logic even when the app runs on a device you do not control. A user can inspect traffic, decompile the app, modify local storage, or run the app on a rooted device. Therefore, the app should never be the only place where critical security decisions happen. The backend, database rules, authentication, and authorization must enforce the real protection.""",
+            code: r"""Client app = untrusted
+Server/database rules = real enforcement""",
+          ),
+          ConceptPoint(
+            question: r"""How should tokens and secrets be stored?""",
+            explanation:
+                r"""Do not store API secrets, private keys, or admin credentials inside the app. Anything shipped in the app can be extracted. User tokens should be short-lived when possible and stored in secure storage backed by Keychain on iOS and Keystore on Android. Do not store tokens in plain SharedPreferences if the token gives access to sensitive data.""",
+            code: r"""Use: flutter_secure_storage for user tokens
+Avoid: hardcoded secret keys in Dart code""",
+          ),
+          ConceptPoint(
+            question: r"""How do you secure API communication?""",
+            explanation:
+                r"""Use HTTPS for all production API traffic, validate server responses, use proper authentication, and handle token refresh safely. For high-risk apps, consider certificate pinning, but understand the operational trade-off: certificate changes can break older app versions if pinning is managed badly.""",
+            code: r"""HTTPS + auth token + backend authorization
+Optional: certificate pinning for high-risk apps""",
+          ),
+          ConceptPoint(
+            question: r"""How do you validate input securely?""",
+            explanation:
+                r"""Validate input both in the UI and on the backend. UI validation helps the user, but backend validation protects the system. Never trust values from text fields, route parameters, local storage, QR codes, deep links, or push notification payloads. Escape or parameterize values when they are used in queries or rendered in web content.""",
+            code: r"""UI validation = better UX
+Server validation = actual security""",
+          ),
+        ],
+      ),
+      LevelSection(
+        level: r"""senior""",
+        title: r"""Security Architecture""",
+        points: [
+          ConceptPoint(
+            question: r"""What are the most important secure coding rules?""",
+            explanation:
+                r"""Use least privilege, never trust the client, keep secrets out of the app, validate data at boundaries, fail safely, log security events without leaking sensitive data, and keep dependencies updated. Also avoid exposing stack traces, tokens, passwords, personal data, or payment information in logs, crash reports, or analytics.""",
+            code: r"""Security checklist:
+least privilege, no hardcoded secrets, validate, safe logs, updated deps""",
+          ),
+          ConceptPoint(
+            question: r"""How do you protect Firebase apps?""",
+            explanation:
+                r"""Firebase config values are not secret by themselves, but Firestore, Realtime Database, and Storage Security Rules must be strict. Rules should check authentication, ownership, roles, tenant IDs, and allowed fields. If the rule says allow read, write: if true, the app is not secure even if the UI hides buttons.""",
+            code: r"""allow write: if request.auth != null
+  && request.auth.uid == resource.data.ownerId;""",
+          ),
+          ConceptPoint(
+            question: r"""How do you handle rooted or jailbroken devices?""",
+            explanation:
+                r"""Root and jailbreak detection can raise risk signals, but it should not be treated as perfect protection because attackers can bypass checks. For sensitive apps, combine device integrity signals with server-side risk decisions, short-lived sessions, re-authentication for risky actions, and limited offline access.""",
+            code: r"""Device risk signal -> backend decision
+Never rely on local root check alone""",
+          ),
+          ConceptPoint(
+            question: r"""How do you secure local data?""",
+            explanation:
+                r"""Classify local data first. Non-sensitive preferences can use SharedPreferences. Sensitive tokens should use secure storage. Sensitive offline business data may need encrypted databases, expiration, user logout cleanup, and screen privacy controls. Also think about backups: encrypted local data can still leak if backups are not controlled.""",
+            code: r"""Preferences -> SharedPreferences
+Tokens -> secure storage
+Sensitive offline data -> encrypted database + cleanup""",
+          ),
+        ],
+      ),
+    ],
+  ),
+  Topic(
+    id: r"""design_system""",
+    label: r"""Design System""",
+    icon: r"""DS""",
+    colorValue: 0xFF805AD5,
+    sections: [
+      LevelSection(
+        level: r"""mid""",
+        title: r"""Design System Basics""",
+        points: [
+          ConceptPoint(
+            question: r"""What is a design system?""",
+            explanation:
+                r"""A design system is a shared language for building consistent UI. It includes colors, typography, spacing, radius, icons, components, states, accessibility rules, and usage guidelines. In Flutter, a design system usually appears as ThemeData, custom theme extensions, reusable widgets, and documented component patterns.""",
+            code:
+                r"""Design tokens -> ThemeData -> components -> app screens""",
+          ),
+          ConceptPoint(
+            question: r"""What are design tokens?""",
+            explanation:
+                r"""Design tokens are named decisions such as primary color, body text size, spacing 16, card radius, or danger color. Instead of hardcoding values everywhere, the app references tokens. This makes the UI consistent and makes brand changes easier because you update the token instead of hunting through every screen.""",
+            code: r"""AppSpacing.md = 16
+AppRadius.card = 8
+AppColors.danger = red""",
+          ),
+          ConceptPoint(
+            question: r"""How does ThemeData help?""",
+            explanation:
+                r"""ThemeData centralizes Material styling such as colorScheme, textTheme, input decoration, buttons, app bars, and visual density. It helps keep screens consistent. A good Flutter app should avoid random one-off colors and text styles unless there is a clear reason.""",
+            code: r"""MaterialApp(
+  theme: AppTheme.light(),
+  darkTheme: AppTheme.dark(),
+);""",
+          ),
+          ConceptPoint(
+            question: r"""Why are component states part of design systems?""",
+            explanation:
+                r"""A component is not only its default look. Buttons, text fields, cards, and list items need states: disabled, loading, focused, error, selected, pressed, hover, and empty. If these states are not designed and implemented consistently, the app feels unfinished and users get unclear feedback.""",
+            code: r"""Button states:
+default, hover, pressed, loading, disabled""",
+          ),
+        ],
+      ),
+      LevelSection(
+        level: r"""senior""",
+        title: r"""Scalable UI Systems""",
+        points: [
+          ConceptPoint(
+            question: r"""How do you build a scalable Flutter design system?""",
+            explanation:
+                r"""Create a small set of foundations first: colors, typography, spacing, radius, elevation, motion, and accessibility. Then build reusable components that consume those foundations. Avoid making every screen own its own visual rules. For large teams, document component usage and keep design tokens aligned with Figma or the product design source.""",
+            code:
+                r"""Foundations -> Theme extensions -> components -> feature screens""",
+          ),
+          ConceptPoint(
+            question: r"""How do you support light mode and dark mode?""",
+            explanation:
+                r"""Use semantic colors instead of color names tied to one mode. For example, use surface, onSurface, primary, danger, success, and border instead of always using blueGrey700 or white. Semantic tokens can change values between light and dark themes while components keep the same meaning.""",
+            code: r"""Bad: Colors.white
+Good: Theme.of(context).colorScheme.surface""",
+          ),
+          ConceptPoint(
+            question: r"""How does accessibility connect to design systems?""",
+            explanation:
+                r"""Accessibility should be built into the design system, not fixed at the end. Define contrast rules, minimum touch targets, text scale behavior, focus states, semantic labels, and error messaging patterns. When accessible components are reused, every screen benefits.""",
+            code: r"""Component rule:
+min tap target 48x48
+supports text scale
+has semantic label when icon-only""",
+          ),
+          ConceptPoint(
+            question: r"""How do golden tests help a design system?""",
+            explanation:
+                r"""Golden tests can capture the visual output of core components and important states. They are useful for detecting accidental visual regressions when themes or widgets change. They should be stable and focused on components or important screens, not every tiny layout detail in the whole app.""",
+            code: r"""Golden test:
+PrimaryButton default/disabled/loading states""",
+          ),
+        ],
+      ),
+    ],
+  ),
+  Topic(
+    id: r"""oop_solid""",
+    label: r"""OOP & SOLID""",
+    icon: r"""OOP""",
+    colorValue: 0xFFD69E2E,
+    sections: [
+      LevelSection(
+        level: r"""mid""",
+        title: r"""Object Oriented Programming""",
+        points: [
+          ConceptPoint(
+            question: r"""What is object oriented programming?""",
+            explanation:
+                r"""Object oriented programming organizes software around objects that contain data and behavior. In Dart and Flutter, objects are everywhere: widgets, controllers, services, repositories, models, blocs, and use cases. OOP helps when it models real responsibilities clearly, but it can hurt if everything becomes a deep inheritance tree.""",
+            code: r"""class UserRepository {
+  Future<User> loadUser(String id) => api.fetchUser(id);
+}""",
+          ),
+          ConceptPoint(
+            question:
+                r"""What are encapsulation, abstraction, inheritance, and polymorphism?""",
+            explanation:
+                r"""Encapsulation hides internal details behind a clear API. Abstraction exposes what something does without forcing callers to know how it works. Inheritance lets a class reuse or specialize behavior from another class. Polymorphism lets different implementations be used through the same interface, such as a real API repository and a fake test repository.""",
+            code: r"""abstract class AuthRepository {
+  Future<User> signIn(String email, String password);
+}""",
+          ),
+          ConceptPoint(
+            question:
+                r"""When should you prefer composition over inheritance?""",
+            explanation:
+                r"""Composition means building behavior by using other objects instead of extending a base class. In Flutter, composition is usually preferred because widgets naturally compose. Deep inheritance can make code rigid and hard to test. Use inheritance when there is a true is-a relationship; use composition when an object simply needs another capability.""",
+            code: r"""class LoginBloc {
+  final AuthRepository auth;
+  LoginBloc(this.auth);
+}""",
+          ),
+          ConceptPoint(
+            question: r"""How does OOP help testing?""",
+            explanation:
+                r"""If code depends on abstractions, tests can replace real services with fake implementations. For example, a bloc can depend on AuthRepository instead of directly creating an HTTP client. In tests, you pass a fake repository that returns success or failure immediately.""",
+            code: r"""final bloc = LoginBloc(FakeAuthRepository());""",
+          ),
+        ],
+      ),
+      LevelSection(
+        level: r"""senior""",
+        title: r"""SOLID Principles""",
+        points: [
+          ConceptPoint(
+            question: r"""What is Single Responsibility Principle?""",
+            explanation:
+                r"""A class should have one main reason to change. In Flutter, a widget should not own UI layout, validation rules, API calls, local database writes, analytics, and navigation all at once. Split responsibilities into widgets, blocs/controllers, repositories, services, and models. This makes code easier to test and change.""",
+            code: r"""Widget -> renders UI
+Bloc -> state and events
+Repository -> data access""",
+          ),
+          ConceptPoint(
+            question: r"""What is Open/Closed Principle?""",
+            explanation:
+                r"""Code should be open for extension but closed for modification. You should be able to add new behavior without constantly editing risky existing logic. In practice, this can mean strategies, interfaces, or small composable classes. Do not over-engineer every feature, but use this principle when business rules are expected to grow.""",
+            code: r"""abstract class DiscountRule {
+  Money apply(Money price);
+}""",
+          ),
+          ConceptPoint(
+            question: r"""What are Liskov and Interface Segregation?""",
+            explanation:
+                r"""Liskov Substitution means a subtype should be usable wherever its parent type is expected without breaking behavior. Interface Segregation means clients should not depend on methods they do not use. Instead of one huge service interface, create smaller focused contracts such as AuthReader, AuthWriter, or UserProfileRepository.""",
+            code: r"""Bad: HugeUserService with 30 methods
+Good: AuthRepository + ProfileRepository + AvatarUploader""",
+          ),
+          ConceptPoint(
+            question: r"""What is Dependency Inversion Principle?""",
+            explanation:
+                r"""High-level policy should not depend directly on low-level details. A bloc or use case should depend on an abstract repository, not directly on Dio, Firebase, or SQLite. This reduces coupling and makes tests easier because the low-level implementation can be replaced.""",
+            code: r"""class CheckoutUseCase {
+  final PaymentRepository payments;
+  CheckoutUseCase(this.payments);
+}""",
+          ),
+        ],
+      ),
+    ],
+  ),
+  Topic(
+    id: r"""testing""",
+    label: r"""Testing""",
+    icon: r"""TEST""",
+    colorValue: 0xFF38A169,
+    sections: [
+      LevelSection(
+        level: r"""mid""",
+        title: r"""Flutter Test Types""",
+        points: [
+          ConceptPoint(
+            question: r"""What is a unit test?""",
+            explanation:
+                r"""A unit test checks a small piece of logic in isolation, usually without Flutter UI. It is fast and should not depend on network, device storage, or real time unless those dependencies are controlled. Use unit tests for validators, formatters, use cases, repositories with fake clients, and pure business rules.""",
+            code: r"""test('email validator rejects invalid email', () {
+  expect(validateEmail('bad'), isFalse);
+});""",
+          ),
+          ConceptPoint(
+            question: r"""What is a widget test?""",
+            explanation:
+                r"""A widget test renders a widget in a test environment and verifies UI behavior. It is faster than a real device test but still lets you tap buttons, enter text, pump frames, and inspect widgets. Use widget tests for forms, empty states, loading states, error states, and important UI interactions.""",
+            code: r"""await tester.pumpWidget(const LoginScreen());
+await tester.enterText(find.byType(TextField).first, 'john@test.com');
+await tester.tap(find.text('Login'));
+await tester.pump();""",
+          ),
+          ConceptPoint(
+            question: r"""What is a bloc test?""",
+            explanation:
+                r"""A bloc test verifies that a Bloc or Cubit emits the expected states when events or methods are triggered. It is useful because state management logic can be tested without rendering the full UI. The common package is bloc_test, often used with mocktail or Mockito for dependencies.""",
+            code: r"""blocTest<LoginBloc, LoginState>(
+  'emits loading then success',
+  build: () => LoginBloc(fakeAuth),
+  act: (bloc) => bloc.add(LoginSubmitted()),
+  expect: () => [LoginLoading(), LoginSuccess()],
+);""",
+          ),
+          ConceptPoint(
+            question: r"""What is an integration test?""",
+            explanation:
+                r"""An integration test runs the app on a real device, emulator, simulator, or desktop target and verifies a complete user flow. It is slower than unit and widget tests, but it catches issues across routing, plugins, storage, platform behavior, and real rendering. Use it for critical flows such as login, checkout, onboarding, or file import.""",
+            code: r"""flutter test integration_test
+flutter drive --driver=test_driver/integration_test.dart""",
+          ),
+        ],
+      ),
+      LevelSection(
+        level: r"""senior""",
+        title: r"""Testing Strategy""",
+        points: [
+          ConceptPoint(
+            question: r"""What is a golden test?""",
+            explanation:
+                r"""A golden test compares a widget's rendered pixels against a saved reference image. It is useful for design systems, visual regression testing, and important component states. Golden tests need stable fonts, screen sizes, themes, and CI setup, otherwise they can become noisy.""",
+            code: r"""await expectLater(
+  find.byType(ProfileCard),
+  matchesGoldenFile('goldens/profile_card.png'),
+);""",
+          ),
+          ConceptPoint(
+            question: r"""How do you choose what to test?""",
+            explanation:
+                r"""Test the highest-risk behavior first: business rules, money, authentication, permissions, data loss, crash-prone code, and critical user flows. Do not try to test every getter or every visual detail. A practical test suite has many fast unit tests, enough widget tests for UI states, some bloc tests for state logic, a few integration tests for critical flows, and golden tests for reusable visual components.""",
+            code: r"""Testing pyramid:
+many unit tests
+some widget/bloc tests
+few integration tests
+targeted golden tests""",
+          ),
+          ConceptPoint(
+            question: r"""How do mocks, fakes, and stubs differ?""",
+            explanation:
+                r"""A fake is a working lightweight implementation, like an in-memory repository. A stub returns prepared answers. A mock verifies interactions, such as whether analytics.track was called. Prefer fakes when they make tests easier to read. Use mocks when the interaction itself is the behavior you need to verify.""",
+            code: r"""FakeAuthRepository -> returns test user
+MockAnalytics -> verify event was tracked""",
+          ),
+          ConceptPoint(
+            question: r"""How do you make code testable?""",
+            explanation:
+                r"""Inject dependencies, keep business logic out of widgets, avoid static global state for important behavior, isolate platform services behind interfaces, and control time/randomness in tests. Testable code is usually better designed because responsibilities are clearer and side effects are easier to manage.""",
+            code: r"""class SessionManager {
+  final Clock clock;
+  final TokenStore tokens;
+  SessionManager(this.clock, this.tokens);
+}""",
           ),
         ],
       ),

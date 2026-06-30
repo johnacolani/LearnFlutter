@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
 class WindowTransparencyService {
-  static bool get isSupported => Platform.isMacOS || Platform.isWindows || Platform.isLinux;
+  static bool get isSupported =>
+      Platform.isMacOS || Platform.isWindows || Platform.isLinux;
 
   static Future<void> initialize() async {
     if (!isSupported) return;
@@ -13,7 +14,7 @@ class WindowTransparencyService {
     await windowManager.waitUntilReadyToShow(
       const WindowOptions(
         title: 'Flutter Interview Prep',
-        backgroundColor: Colors.transparent,
+        backgroundColor: Color(0xFF0F1117),
         titleBarStyle: TitleBarStyle.normal,
         size: Size(1120, 780),
         minimumSize: Size(360, 520),
@@ -50,7 +51,12 @@ class WindowTransparencyService {
 
   static Future<void> setTitleBarHidden(bool hidden) async {
     if (!isSupported) return;
-    await windowManager.setTitleBarStyle(hidden ? TitleBarStyle.hidden : TitleBarStyle.normal);
+    if (Platform.isWindows) {
+      await windowManager.setTitleBarStyle(TitleBarStyle.normal);
+      return;
+    }
+    await windowManager
+        .setTitleBarStyle(hidden ? TitleBarStyle.hidden : TitleBarStyle.normal);
   }
 
   static Future<void> setClickThrough(bool enabled) async {

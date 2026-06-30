@@ -50,3 +50,5 @@ class _AppScrollBehavior extends MaterialScrollBehavior {
         PointerDeviceKind.stylus,
       };
 }
+
+// I want to add some other section to this app, App optimization and howmany
