@@ -8,6 +8,21 @@ import '../services/window_transparency/window_transparency.dart';
 
 const List<double> kFontSteps = [0.85, 1.0, 1.15, 1.3, 1.45];
 
+const List<int> kTextColorOptions = [
+  0xFFF7FAFC,
+  0xFF000000,
+  0xFFFFFFFF,
+  0xFF1A202C,
+  0xFF2D3748,
+  0xFFE53E3E,
+  0xFFDD6B20,
+  0xFFD69E2E,
+  0xFF38A169,
+  0xFF3182CE,
+  0xFF805AD5,
+  0xFFD53F8C,
+];
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -44,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool interviewMode = false;
   bool showInterviewAnswer = false;
   double windowOpacity = 0.82;
+  int textColorValue = 0xFFF7FAFC;
   String searchQuery = '';
   _VisiblePoint? interviewPoint;
   final Set<String> favorites = <String>{};
@@ -52,6 +68,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   double get scale => kFontSteps[fontStepIndex];
   double fs(double px) => px * scale;
+  Color get textColor => Color(textColorValue);
+  Color get secondaryTextColor => textColor.withValues(alpha: 0.72);
+  Color get mutedTextColor => textColor.withValues(alpha: 0.52);
 
   Topic get activeTopic => kTopics.firstWhere((t) => t.id == activeTopicId);
   LevelSection get activeSection => activeTopic.sections.firstWhere((s) => s.level == activeLevel);
@@ -73,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       fontStepIndex = prefs.getInt('fontStepIndex') ?? fontStepIndex;
       windowOpacity = prefs.getDouble('windowOpacity') ?? windowOpacity;
+      textColorValue = prefs.getInt('textColorValue') ?? textColorValue;
       favorites
         ..clear()
         ..addAll(prefs.getStringList('favorites') ?? const []);
@@ -89,6 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('fontStepIndex', fontStepIndex);
     await prefs.setDouble('windowOpacity', windowOpacity);
+    await prefs.setInt('textColorValue', textColorValue);
     await prefs.setStringList('favorites', favorites.toList());
     await prefs.setStringList('confidence', confidence.entries.map((e) => '${e.key}|${e.value}').toList());
   }
@@ -168,6 +189,17 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => windowOpacity = value);
     if (stickerMode) await WindowTransparencyService.setOpacity(value);
     _savePrefs();
+  }
+
+  void _changeTextColor(int value) {
+    setState(() => textColorValue = value);
+    _savePrefs();
+  }
+
+  String _textColorLabel(int value) {
+    if (value == 0xFF000000) return 'Black';
+    if (value == 0xFFFFFFFF) return 'White';
+    return '#${value.toRadixString(16).substring(2).toUpperCase()}';
   }
 
   void _toggleFavorite(String id) {
@@ -282,11 +314,11 @@ class _HomeScreenState extends State<HomeScreen> {
             Row(children: [
               Text('🎯', style: TextStyle(fontSize: fs(compact ? 24 : 30))),
               const SizedBox(width: 12),
-              Expanded(child: Text(compact ? 'Senior Flutter Interview Handbook' : 'Flutter Senior Interview Prep', style: TextStyle(fontSize: fs(compact ? 20 : 26), fontWeight: FontWeight.bold, color: const Color(0xFFF7FAFC), letterSpacing: -0.4))),
+              Expanded(child: Text(compact ? 'Senior Flutter Interview Handbook' : 'Flutter Senior Interview Prep', style: TextStyle(fontSize: fs(compact ? 20 : 26), fontWeight: FontWeight.bold, color: textColor, letterSpacing: -0.4))),
               if (!compact) _buildTopControls(),
             ]),
             const SizedBox(height: 8),
-            Text('Interview companion with responsive layout, desktop sticker mode, search, bookmarks, reading mode, and mock interview mode.', style: TextStyle(fontSize: fs(14), color: const Color(0xFFA0AEC0), height: 1.45)),
+            Text('Interview companion with responsive layout, desktop sticker mode, search, bookmarks, reading mode, and mock interview mode.', style: TextStyle(fontSize: fs(14), color: secondaryTextColor, height: 1.45)),
             const SizedBox(height: 14),
             _buildSearchAndActions(compact: compact),
             const SizedBox(height: 12),
@@ -347,7 +379,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _fontButton('−', fontStepIndex == 0, _decreaseFont),
         SizedBox(width: compact ? 30 : 42, child: Text('${(scale * 100).round()}%', textAlign: TextAlign.center, style: TextStyle(fontSize: compact ? 10 : 11, color: const Color(0xFF718096), fontWeight: FontWeight.w700))),
         _fontButton('+', fontStepIndex == kFontSteps.length - 1, _increaseFont),
-        if (WindowTransparencyService.isSupported) ...[const SizedBox(width: 4), _stickerButton()],
+        if (WindowTransparencyService.isSupported) ...[const SizedBox(width: 4), _stickerButton(), const SizedBox(width: 2), _textColorButton()],
       ]),
     );
   }
@@ -363,6 +395,34 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _textColorButton() {
+    return PopupMenuButton<int>(
+      tooltip: 'Text color',
+      onSelected: _changeTextColor,
+      color: const Color(0xFF1A202C),
+      itemBuilder: (context) => [
+        for (final value in kTextColorOptions)
+          PopupMenuItem<int>(
+            value: value,
+            child: Row(children: [
+              Container(width: 18, height: 18, decoration: BoxDecoration(color: Color(value), shape: BoxShape.circle, border: Border.all(color: const Color(0xFF718096)))),
+              const SizedBox(width: 10),
+              Text(_textColorLabel(value), style: const TextStyle(color: Color(0xFFE2E8F0), fontWeight: FontWeight.w600)),
+              const Spacer(),
+              if (textColorValue == value) const Icon(Icons.check, size: 18, color: Color(0xFF38A169)),
+            ]),
+          ),
+      ],
+      child: SizedBox(
+        width: 30,
+        height: 30,
+        child: Stack(alignment: Alignment.center, children: [
+          Icon(Icons.format_color_text, size: 17, color: textColor),
+          Positioned(bottom: 5, child: Container(width: 16, height: 3, decoration: BoxDecoration(color: textColor, borderRadius: BorderRadius.circular(999)))),
+        ]),
+      ),
+    );
+  }
   Widget _buildStickerPanel({required bool compact}) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
@@ -372,11 +432,11 @@ class _HomeScreenState extends State<HomeScreen> {
         Row(children: [
           const Icon(Icons.push_pin, size: 18, color: Color(0xFFCBD5E0)),
           const SizedBox(width: 8),
-          Expanded(child: Text('Desktop Sticker Mode', style: TextStyle(fontSize: fs(14), fontWeight: FontWeight.w800, color: Colors.white))),
+          Expanded(child: Text('Desktop Sticker Mode', style: TextStyle(fontSize: fs(14), fontWeight: FontWeight.w800, color: textColor))),
           Switch(value: stickerMode, onChanged: (_) => _toggleStickerMode()),
         ]),
         if (stickerMode) ...[
-          Text('Opacity ${(windowOpacity * 100).round()}%', style: TextStyle(fontSize: fs(12.5), color: const Color(0xFFA0AEC0))),
+          Text('Opacity ${(windowOpacity * 100).round()}%', style: TextStyle(fontSize: fs(12.5), color: secondaryTextColor)),
           Slider(value: windowOpacity, min: 0.2, max: 1.0, divisions: 16, label: '${(windowOpacity * 100).round()}%', onChanged: _changeWindowOpacity),
           Wrap(spacing: 12, runSpacing: 6, children: [
             _checkControl('Always on top', alwaysOnTop, (v) async { setState(() => alwaysOnTop = v); await WindowTransparencyService.setAlwaysOnTop(v); }),
@@ -394,7 +454,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ]),
           const SizedBox(height: 6),
-          Text('Plugin: window_manager. It controls opacity, always-on-top, title bar style, and click-through on supported desktop platforms. Mobile/web keep a safe fallback.', style: TextStyle(fontSize: fs(12.3), color: const Color(0xFFA0AEC0), height: 1.45)),
+          Text('Plugin: window_manager. It controls opacity, always-on-top, title bar style, and click-through on supported desktop platforms. Mobile/web keep a safe fallback.', style: TextStyle(fontSize: fs(12.3), color: secondaryTextColor, height: 1.45)),
         ],
       ]),
     );
@@ -407,7 +467,7 @@ class _HomeScreenState extends State<HomeScreen> {
       onSelected: onChanged,
       selectedColor: const Color(0xFF2B6CB0),
       backgroundColor: const Color(0xFF1A202C),
-      checkmarkColor: Colors.white,
+      checkmarkColor: textColor,
       labelStyle: const TextStyle(color: Color(0xFFE2E8F0), fontWeight: FontWeight.w600),
     );
   }
@@ -418,7 +478,7 @@ class _HomeScreenState extends State<HomeScreen> {
       label: Text(label),
       onPressed: onTap,
       backgroundColor: selected ? const Color(0xFF4F6AF0) : const Color(0xFF1A202C),
-      labelStyle: TextStyle(color: Colors.white, fontSize: fs(13), fontWeight: FontWeight.w700),
+      labelStyle: TextStyle(color: textColor, fontSize: fs(13), fontWeight: FontWeight.w700),
       side: const BorderSide(color: Color(0xFF2D3748)),
     );
   }
@@ -428,7 +488,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildStatChip(String text) {
-    return Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), decoration: BoxDecoration(color: const Color(0xFF1A202C), borderRadius: BorderRadius.circular(999), border: Border.all(color: const Color(0xFF2D3748))), child: Text(text, style: TextStyle(fontSize: fs(12.5), color: const Color(0xFFCBD5E0), fontWeight: FontWeight.w600)));
+    return Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), decoration: BoxDecoration(color: const Color(0xFF1A202C), borderRadius: BorderRadius.circular(999), border: Border.all(color: const Color(0xFF2D3748))), child: Text(text, style: TextStyle(fontSize: fs(12.5), color: textColor, fontWeight: FontWeight.w600)));
   }
 
   Widget _buildLevelToggle() {
@@ -482,9 +542,9 @@ class _HomeScreenState extends State<HomeScreen> {
         Text(searchQuery.isNotEmpty ? '🔎' : activeTopic.icon, style: TextStyle(fontSize: fs(30))),
         const SizedBox(width: 12),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(title, style: TextStyle(fontSize: fs(21), fontWeight: FontWeight.bold, color: const Color(0xFFF7FAFC))),
+          Text(title, style: TextStyle(fontSize: fs(21), fontWeight: FontWeight.bold, color: textColor)),
           const SizedBox(height: 4),
-          Text(subtitle, style: TextStyle(fontSize: fs(13.5), color: const Color(0xFFA0AEC0))),
+          Text(subtitle, style: TextStyle(fontSize: fs(13.5), color: secondaryTextColor)),
         ])),
       ]),
     );
@@ -497,7 +557,7 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(color: const Color(0xFF1A202C), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFF805AD5))),
       child: Wrap(spacing: 10, runSpacing: 10, crossAxisAlignment: WrapCrossAlignment.center, children: [
-        Text('🎤 CEO Mode', style: TextStyle(fontSize: fs(14), fontWeight: FontWeight.bold, color: Colors.white)),
+        Text('🎤 CEO Mode', style: TextStyle(fontSize: fs(14), fontWeight: FontWeight.bold, color: textColor)),
         _actionChip(icon: showInterviewAnswer ? Icons.visibility_off : Icons.visibility, label: showInterviewAnswer ? 'Hide answer' : 'Reveal answer', selected: showInterviewAnswer, onTap: () => setState(() => showInterviewAnswer = !showInterviewAnswer)),
         _actionChip(icon: Icons.shuffle, label: 'Next question', selected: false, onTap: _nextInterviewQuestion),
         _actionChip(icon: Icons.close, label: 'Exit', selected: false, onTap: () => setState(() { interviewMode = false; readingMode = false; interviewPoint = null; })),
@@ -506,7 +566,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _emptyState() {
-    return Container(width: double.infinity, padding: const EdgeInsets.all(24), decoration: BoxDecoration(color: const Color(0xFF1A202C), borderRadius: BorderRadius.circular(14), border: Border.all(color: const Color(0xFF2D3748))), child: Text('No cards found. Try another search term.', style: TextStyle(fontSize: fs(15), color: const Color(0xFFA0AEC0))));
+    return Container(width: double.infinity, padding: const EdgeInsets.all(24), decoration: BoxDecoration(color: const Color(0xFF1A202C), borderRadius: BorderRadius.circular(14), border: Border.all(color: const Color(0xFF2D3748))), child: Text('No cards found. Try another search term.', style: TextStyle(fontSize: fs(15), color: secondaryTextColor)));
   }
 
   Widget _buildPointCard(_VisiblePoint row, int displayIndex) {
@@ -523,8 +583,8 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(width: 32, height: 32, decoration: BoxDecoration(color: topicColor.withOpacity(0.2), shape: BoxShape.circle), child: Center(child: Text('${row.index + 1}', style: TextStyle(fontSize: fs(13), fontWeight: FontWeight.bold, color: topicColor)))),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            if (searchQuery.isNotEmpty || interviewMode) Text('${row.topic.icon} ${row.topic.label} • ${row.section.title}', style: TextStyle(fontSize: fs(11.5), color: const Color(0xFFA0AEC0), fontWeight: FontWeight.w700)),
-            Text(row.point.question, style: TextStyle(fontSize: fs(readingMode ? 20 : 16), fontWeight: FontWeight.w700, color: const Color(0xFFF7FAFC), height: 1.35)),
+            if (searchQuery.isNotEmpty || interviewMode) Text('${row.topic.icon} ${row.topic.label} • ${row.section.title}', style: TextStyle(fontSize: fs(11.5), color: secondaryTextColor, fontWeight: FontWeight.w700)),
+            Text(row.point.question, style: TextStyle(fontSize: fs(readingMode ? 20 : 16), fontWeight: FontWeight.w700, color: textColor, height: 1.35)),
           ])),
           IconButton(tooltip: 'Favorite', icon: Icon(isFav ? Icons.star : Icons.star_border, color: isFav ? const Color(0xFFF6E05E) : const Color(0xFF718096)), onPressed: () => _toggleFavorite(row.id)),
           if (!readingMode) Icon(isOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down, color: const Color(0xFF718096)),
@@ -535,7 +595,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _hiddenAnswer() {
-    return Container(width: double.infinity, padding: const EdgeInsets.all(20), decoration: const BoxDecoration(color: Color(0xFF161B27), border: Border(top: BorderSide(color: Color(0xFF2D3748)))), child: Text('Answer hidden. Say your answer first, then press Reveal answer.', style: TextStyle(fontSize: fs(15), color: const Color(0xFFA0AEC0), height: 1.5)));
+    return Container(width: double.infinity, padding: const EdgeInsets.all(20), decoration: const BoxDecoration(color: Color(0xFF161B27), border: Border(top: BorderSide(color: Color(0xFF2D3748)))), child: Text('Answer hidden. Say your answer first, then press Reveal answer.', style: TextStyle(fontSize: fs(15), color: secondaryTextColor, height: 1.5)));
   }
 
   Widget _buildExpandedContent(_VisiblePoint row, int conf) {
@@ -544,7 +604,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Container(width: double.infinity, decoration: const BoxDecoration(color: Color(0xFF161B27), border: Border(top: BorderSide(color: Color(0xFF2D3748)))), padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         _sectionLabel('EXPLANATION'),
         const SizedBox(height: 8),
-        Text(point.explanation, style: TextStyle(fontSize: fs(readingMode ? 17 : 15), color: const Color(0xFFE2E8F0), height: 1.65)),
+        Text(point.explanation, style: TextStyle(fontSize: fs(readingMode ? 17 : 15), color: textColor, height: 1.65)),
         const SizedBox(height: 12),
         _confidenceBar(row.id, conf),
       ])),
@@ -552,25 +612,25 @@ class _HomeScreenState extends State<HomeScreen> {
         Container(width: double.infinity, decoration: const BoxDecoration(color: Color(0xFF0D1117), border: Border(top: BorderSide(color: Color(0xFF2D3748)))), padding: const EdgeInsets.fromLTRB(16, 12, 16, 16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           _sectionLabel('INTERVIEW PHRASE / CODE'),
           const SizedBox(height: 10),
-          Scrollbar(thumbVisibility: true, child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: SelectableText(point.code, style: TextStyle(fontSize: fs(readingMode ? 15 : 13.5), height: 1.65, color: const Color(0xFFA8FF78), fontFamily: 'monospace')))),
+          Scrollbar(thumbVisibility: true, child: SingleChildScrollView(scrollDirection: Axis.horizontal, child: SelectableText(point.code, style: TextStyle(fontSize: fs(readingMode ? 15 : 13.5), height: 1.65, color: textColor, fontFamily: 'monospace')))),
         ])),
     ]);
   }
 
   Widget _confidenceBar(String id, int conf) {
     return Wrap(spacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
-      Text('My confidence:', style: TextStyle(fontSize: fs(12.5), color: const Color(0xFFA0AEC0), fontWeight: FontWeight.w700)),
+      Text('My confidence:', style: TextStyle(fontSize: fs(12.5), color: secondaryTextColor, fontWeight: FontWeight.w700)),
       for (var i = 1; i <= 5; i++) IconButton(visualDensity: VisualDensity.compact, iconSize: 19, padding: EdgeInsets.zero, constraints: const BoxConstraints(minWidth: 24, minHeight: 24), onPressed: () => _setConfidence(id, i), icon: Icon(i <= conf ? Icons.star : Icons.star_border, color: i <= conf ? const Color(0xFFF6E05E) : const Color(0xFF718096))),
     ]);
   }
 
-  Widget _sectionLabel(String text) => Text(text, style: TextStyle(fontSize: fs(11), fontWeight: FontWeight.bold, color: const Color(0xFFA0AEC0), letterSpacing: 1));
+  Widget _sectionLabel(String text) => Text(text, style: TextStyle(fontSize: fs(11), fontWeight: FontWeight.bold, color: secondaryTextColor, letterSpacing: 1));
 
   Widget _buildFooterTip() {
     return Container(decoration: BoxDecoration(color: const Color(0xFF1A202C), border: Border.all(color: const Color(0xFF2D3748)), borderRadius: BorderRadius.circular(12)), padding: const EdgeInsets.all(14), child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
       const Text('💡'),
       const SizedBox(width: 10),
-      Expanded(child: Text('Use the 6-step interview formula: what it is, why it exists, how it works, where you used it, trade-offs, and limitations. Keep your answers honest and connect them to 4iCAD, ASD, Phillips, or Toyota when relevant.', style: TextStyle(fontSize: fs(13.5), color: const Color(0xFFA0AEC0), height: 1.45))),
+      Expanded(child: Text('Use the 6-step interview formula: what it is, why it exists, how it works, where you used it, trade-offs, and limitations. Keep your answers honest and connect them to 4iCAD, ASD, Phillips, or Toyota when relevant.', style: TextStyle(fontSize: fs(13.5), color: secondaryTextColor, height: 1.45))),
     ]));
   }
 
