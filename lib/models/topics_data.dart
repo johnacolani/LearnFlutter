@@ -3,8 +3,18 @@ class ConceptPoint {
   final String question;
   final String explanation;
   final String code;
-  const ConceptPoint(
-      {required this.question, required this.explanation, required this.code});
+  final String? shortAnswer;
+  final String? detailedAnswer;
+  final String? interviewAnswer;
+
+  const ConceptPoint({
+    required this.question,
+    required this.explanation,
+    required this.code,
+    this.shortAnswer,
+    this.detailedAnswer,
+    this.interviewAnswer,
+  });
 }
 
 class LevelSection {
@@ -27,6 +37,24 @@ class Topic {
       required this.icon,
       required this.colorValue,
       required this.sections});
+}
+
+class AppTrack {
+  final String id;
+  final String label;
+  final String icon;
+  final String description;
+  final int colorValue;
+  final List<Topic> topics;
+
+  const AppTrack({
+    required this.id,
+    required this.label,
+    required this.icon,
+    required this.description,
+    required this.colorValue,
+    required this.topics,
+  });
 }
 
 final List<Topic> kTopics = [
@@ -1725,5 +1753,433 @@ MockAnalytics -> verify event was tracked""",
         ],
       ),
     ],
+  ),
+];
+
+ConceptPoint _pdCard(
+    String question, String short, String detailed, String interview) {
+  return ConceptPoint(
+    question: question,
+    explanation: detailed,
+    code: interview,
+    shortAnswer: short,
+    detailedAnswer: detailed,
+    interviewAnswer: interview,
+  );
+}
+
+Topic _pdTopic({
+  required String id,
+  required String label,
+  required String icon,
+  required int color,
+  required String what,
+  required String why,
+  required String how,
+  required String where,
+  required String tradeoffs,
+  required String limitations,
+  required String answer,
+}) {
+  return Topic(
+    id: id,
+    label: label,
+    icon: icon,
+    colorValue: color,
+    sections: [
+      LevelSection(
+        level: r"""product""",
+        title: r"""Interview Framework""",
+        points: [
+          _pdCard(r"""What is it?""", what, what, answer),
+          _pdCard(r"""Why does it exist?""", why, why, answer),
+          _pdCard(r"""How does it work?""", how, how, answer),
+          _pdCard(r"""Where did I use it?""", where, where, answer),
+          _pdCard(r"""Trade-offs""", tradeoffs, tradeoffs, answer),
+          _pdCard(r"""Limitations""", limitations, limitations, answer),
+          _pdCard(r"""Strong interview answer""", answer, answer, answer),
+        ],
+      ),
+    ],
+  );
+}
+
+ConceptPoint _pdBehavior(String question, String short, String answer) {
+  return _pdCard(question, short, answer, answer);
+}
+
+final List<Topic> kProductDesignTopics = [
+  _pdTopic(
+    id: r"""pd_fundamentals""",
+    label: r"""Product Design Fundamentals""",
+    icon: r"""PD""",
+    color: 0xFF805AD5,
+    what:
+        r"""Product design turns user needs, business goals, and technical constraints into a useful product experience across discovery, UX, UI, validation, delivery, and iteration.""",
+    why:
+        r"""It exists so teams do not build screens before understanding the real problem, the user, the workflow, and the business value.""",
+    how:
+        r"""It works by framing the problem, mapping workflows, exploring options, prototyping, validating, collaborating with developers, and measuring outcomes after release.""",
+    where:
+        r"""I used it in 4iCAD and Absolute Stone Design by converting CAD, production, client, installer, and handoff pain points into real app workflows.""",
+    tradeoffs:
+        r"""The main trade-off is speed versus confidence: lightweight design moves quickly, while deeper discovery reduces risk for complex workflows.""",
+    limitations:
+        r"""Design reduces uncertainty but cannot guarantee market fit, engineering quality, pricing, operations, or stakeholder alignment by itself.""",
+    answer:
+        r"""I see product design as the bridge between real user pain and a working business solution. My background is not only screens; I have 20+ years in industrial design, CAD/CAM, prototyping, manufacturing, client work, and now Flutter development. That helps me design products that are usable, buildable, and connected to real workflows.""",
+  ),
+  _pdTopic(
+    id: r"""ux_research""",
+    label: r"""UX Research""",
+    icon: r"""UXR""",
+    color: 0xFF3182CE,
+    what:
+        r"""UX research is how we understand users, tasks, pain points, context, language, and behavior before and after design decisions.""",
+    why:
+        r"""It exists to reduce guessing and reveal what people actually do, not only what stakeholders assume or what users say they want.""",
+    how:
+        r"""It works through interviews, observation, workflow review, usability testing, surveys, analytics, support feedback, synthesis, and clear product recommendations.""",
+    where:
+        r"""I used research by listening to clients, developers, installers, and production teams, then watching where drawings, measurements, revisions, and handoffs created friction.""",
+    tradeoffs:
+        r"""The trade-off is rigor versus speed. High-risk flows need stronger research, while low-risk UI improvements can use lighter validation.""",
+    limitations:
+        r"""Research can be biased by recruiting, questions, and interpretation. Users can reveal pain, but they do not always define the right solution.""",
+    answer:
+        r"""I use UX research to understand behavior, not just opinions. In my work, the strongest insights often come from real workflow observation: where a client waits, where a production team reworks, where an installer lacks information, or where a CAD task takes too many steps.""",
+  ),
+  _pdTopic(
+    id: r"""design_thinking""",
+    label: r"""Design Thinking""",
+    icon: r"""DT""",
+    color: 0xFFD69E2E,
+    what:
+        r"""Design thinking is a practical approach for solving ambiguous problems through empathy, definition, ideation, prototyping, testing, and iteration.""",
+    why:
+        r"""It exists because teams often jump from a request directly to implementation without validating the problem or considering better alternatives.""",
+    how:
+        r"""It works in cycles: understand the user, define the problem, generate options, prototype quickly, test, learn, and refine the direction.""",
+    where:
+        r"""I used it when shaping 4iCAD and ASD workflows, connecting physical production constraints with digital product ideas and Flutter implementation.""",
+    tradeoffs:
+        r"""Too little exploration creates weak solutions; too much exploration delays delivery. Senior designers choose the right depth for the risk.""",
+    limitations:
+        r"""Design thinking becomes weak when it is only workshops without decisions, evidence, ownership, or follow-through.""",
+    answer:
+        r"""For me, design thinking is not a buzzword. It is how I move from unclear pain to a testable workflow: clarify the user, frame the problem, prototype a direction, involve stakeholders and developers, and make practical decisions.""",
+  ),
+  _pdTopic(
+    id: r"""ui_principles""",
+    label: r"""UI Design Principles""",
+    icon: r"""UI""",
+    color: 0xFF38A169,
+    what:
+        r"""UI principles are rules for making interfaces clear, readable, consistent, responsive, and easy to use: hierarchy, spacing, contrast, alignment, feedback, and affordance.""",
+    why:
+        r"""They exist because users should not decode the interface. Good UI lowers cognitive load and makes the next action predictable.""",
+    how:
+        r"""They work through layout, typography, color, component states, visual hierarchy, error prevention, and clear feedback for user actions.""",
+    where:
+        r"""I used UI principles in Flutter apps, CAD controls, workflow screens, production forms, and dense operational tools where clarity matters more than decoration.""",
+    tradeoffs:
+        r"""A very expressive UI can reduce efficiency in repeated workflows, while a very dense UI can become hard to scan. Context decides the balance.""",
+    limitations:
+        r"""Good UI cannot fix a wrong product direction or broken workflow. It must support a strong UX and product strategy.""",
+    answer:
+        r"""I design UI as a working tool. My goal is hierarchy, readability, reliable states, and fast repeated use, especially for CAD, production, and workflow products where mistakes cost time and money.""",
+  ),
+  _pdTopic(
+    id: r"""pd_design_systems""",
+    label: r"""Design Systems""",
+    icon: r"""DS""",
+    color: 0xFF2B6CB0,
+    what:
+        r"""A design system is a shared set of foundations, components, patterns, states, and rules that helps a team build consistent experiences at scale.""",
+    why:
+        r"""It exists to improve consistency, speed up delivery, reduce repeated decisions, and create a common language between design and engineering.""",
+    how:
+        r"""It works through tokens, typography, color, spacing, components, accessibility rules, documentation, and code alignment.""",
+    where:
+        r"""I used design-system thinking in Flutter by creating repeatable cards, controls, themes, readable text, and consistent interaction states for this app and workflow tools.""",
+    tradeoffs:
+        r"""Too much rigidity blocks product-specific needs; too little governance creates inconsistency. A system should guide without becoming a cage.""",
+    limitations:
+        r"""A design system does not replace product thinking. It supports execution after the team understands the workflow and goals.""",
+    answer:
+        r"""I build design systems around real product needs. Tokens and components matter, but the real value is helping designers and developers ship consistent, accessible, maintainable UI faster.""",
+  ),
+  _pdTopic(
+    id: r"""pd_accessibility""",
+    label: r"""Accessibility""",
+    icon: r"""A11Y""",
+    color: 0xFFE53E3E,
+    what:
+        r"""Accessibility means designing products that people with different abilities, devices, contexts, and assistive technologies can use.""",
+    why:
+        r"""It exists because products should not exclude users, and accessible patterns improve clarity for everyone.""",
+    how:
+        r"""It works through contrast, scalable text, semantic labels, keyboard/focus support, touch targets, readable copy, clear errors, and testing.""",
+    where:
+        r"""I apply it in Flutter with readable cards, text scaling, strong contrast, semantic labels for icon buttons, and layouts that work on desktop and mobile.""",
+    tradeoffs:
+        r"""Accessibility can challenge visual preferences or dense layouts, but the goal is a design that remains clear, attractive, and usable.""",
+    limitations:
+        r"""Automated checks catch only part of the problem. Real accessibility still needs human judgment and assistive technology testing.""",
+    answer:
+        r"""I treat accessibility as product quality. If a user cannot read, navigate, or understand the interface, the design is not finished.""",
+  ),
+  _pdTopic(
+    id: r"""product_strategy""",
+    label: r"""Product Strategy""",
+    icon: r"""STR""",
+    color: 0xFFDD6B20,
+    what:
+        r"""Product strategy defines who the product serves, what problems it prioritizes, how it creates value, and how success will be measured.""",
+    why:
+        r"""It exists because teams cannot build everything. Strategy creates focus and explains what not to build yet.""",
+    how:
+        r"""It works through target users, value proposition, prioritization, roadmap trade-offs, business goals, and measurable outcomes.""",
+    where:
+        r"""In 4iCAD, strategy means focusing on the highest-value CAD workflows first instead of trying to copy every feature from mature CAD tools immediately.""",
+    tradeoffs:
+        r"""A narrow strategy can win a workflow but disappoint users who expect everything; a broad strategy can become shallow and slow.""",
+    limitations:
+        r"""Strategy is only useful if it changes product decisions. A strategy document with no execution impact is not real strategy.""",
+    answer:
+        r"""I connect design to strategy by asking who we serve, what pain matters most, why now, how we measure success, and what we intentionally choose not to do.""",
+  ),
+  _pdTopic(
+    id: r"""metrics_business""",
+    label: r"""Metrics & Business Thinking""",
+    icon: r"""MET""",
+    color: 0xFF2F855A,
+    what:
+        r"""Metrics connect design work to outcomes such as activation, retention, task completion, error reduction, conversion, revenue, time saved, or fewer support issues.""",
+    why:
+        r"""They exist because design should create value, not only attractive screens.""",
+    how:
+        r"""They work by defining success before shipping, instrumenting the product, reviewing behavior and feedback, and iterating based on evidence.""",
+    where:
+        r"""For ASD workflows, useful metrics include fewer job-entry mistakes, fewer drawing revisions, faster quote preparation, and smoother handoffs between teams.""",
+    tradeoffs:
+        r"""Metrics create focus but can distort decisions if chosen badly. A senior designer balances data with research and judgment.""",
+    limitations:
+        r"""Not every design impact is immediate or easy to measure. Trust, clarity, and long-term brand value also matter.""",
+    answer:
+        r"""I measure design success by whether users complete important work better and whether that creates business value. In workflow products, that often means fewer errors, less rework, and faster decisions.""",
+  ),
+  _pdTopic(
+    id: r"""portfolio_case_studies""",
+    label: r"""Portfolio & Case Studies""",
+    icon: r"""PORT""",
+    color: 0xFFD53F8C,
+    what:
+        r"""A case study explains context, problem, role, process, decisions, trade-offs, outcome, and learning.""",
+    why:
+        r"""It exists so hiring teams can understand how you think, collaborate, handle constraints, and create impact.""",
+    how:
+        r"""It works as a product story: context, problem, user, constraints, process, options, solution, validation, outcome, and reflection.""",
+    where:
+        r"""My strongest stories connect industrial design, CAD/CAM, manufacturing, Flutter, 4iCAD, and ASD workflow problems.""",
+    tradeoffs:
+        r"""A portfolio must be concise but deep enough to prove thinking. Too much detail loses people; too little looks superficial.""",
+    limitations:
+        r"""Confidential work can limit visuals, so the story must focus on problem, decisions, process, and impact without exposing private details.""",
+    answer:
+        r"""I present case studies as product stories: the user pain, why it mattered, how I explored solutions, how I collaborated, what trade-offs I made, and what changed because of the design.""",
+  ),
+  _pdTopic(
+    id: r"""whiteboard_challenges""",
+    label: r"""Whiteboard Challenges""",
+    icon: r"""WB""",
+    color: 0xFF4F6AF0,
+    what:
+        r"""A whiteboard challenge is a live design exercise that evaluates problem framing, assumptions, collaboration, sketching, prioritization, and trade-off thinking.""",
+    why:
+        r"""It exists to show how a designer thinks under ambiguity, not to produce a perfect final screen.""",
+    how:
+        r"""It works by clarifying the prompt, identifying users and goals, mapping the flow, sketching options, selecting a direction, and explaining validation.""",
+    where:
+        r"""My concept design, CAD, prototyping, and manufacturing background helps me structure ambiguous problems and move quickly toward practical solutions.""",
+    tradeoffs:
+        r"""The trade-off is speed versus depth. In a live exercise, you must show enough thinking without getting stuck in details.""",
+    limitations:
+        r"""Whiteboard challenges are artificial and miss real research, data, team dynamics, and technical discovery.""",
+    answer:
+        r"""I start by clarifying user, goal, constraints, and success metric. Then I map the workflow, sketch options, explain trade-offs, and define how I would validate the direction.""",
+  ),
+  _pdTopic(
+    id: r"""app_critique""",
+    label: r"""App Critique""",
+    icon: r"""CRIT""",
+    color: 0xFF00A3C4,
+    what:
+        r"""App critique evaluates an existing product for usability, clarity, hierarchy, accessibility, workflow fit, states, and business alignment.""",
+    why:
+        r"""It exists to improve products objectively rather than relying on taste or personal preference.""",
+    how:
+        r"""It works by reviewing target user, task, navigation, information hierarchy, copy, accessibility, errors, empty states, and completion path.""",
+    where:
+        r"""I use critique for CAD interactions, workflow apps, forms, dashboards, and production tools where real job context matters.""",
+    tradeoffs:
+        r"""A critique can find many issues, but the team must prioritize based on user impact, cost, and business risk.""",
+    limitations:
+        r"""Critique is expert review. For high-stakes decisions it should be paired with user testing or product data.""",
+    answer:
+        r"""When I critique an app, I focus on user goal, workflow clarity, hierarchy, accessibility, and measurable friction. I give practical recommendations instead of taste-based comments.""",
+  ),
+  _pdTopic(
+    id: r"""developer_collaboration""",
+    label: r"""Collaboration With Developers""",
+    icon: r"""DEV""",
+    color: 0xFF718096,
+    what:
+        r"""Developer collaboration is how designers and engineers turn product decisions into reliable implementation.""",
+    why:
+        r"""It exists because design quality depends on execution, maintainability, platform constraints, and clear communication.""",
+    how:
+        r"""It works through early technical conversations, clear specs, component states, edge cases, design QA, and pragmatic trade-offs.""",
+    where:
+        r"""My Flutter experience helps me communicate with developers about widgets, state, feasibility, performance, and platform behavior.""",
+    tradeoffs:
+        r"""Sometimes the ideal design is too expensive for the current release. The team must preserve user value while shipping realistically.""",
+    limitations:
+        r"""Collaboration fails when design is thrown over the wall or when technical constraints arrive too late.""",
+    answer:
+        r"""I work with developers as partners. I bring the user problem, workflow, states, and design intent, and I ask for technical constraints early. Because I build Flutter apps, I can make pragmatic decisions without losing the user goal.""",
+  ),
+  _pdTopic(
+    id: r"""behavioral_pd""",
+    label: r"""Behavioral Interview Questions""",
+    icon: r"""INT""",
+    color: 0xFF742A2A,
+    what:
+        r"""Behavioral questions evaluate communication, judgment, collaboration, ownership, ambiguity, stakeholder handling, and learning from failure.""",
+    why:
+        r"""They exist because senior designers are hired for impact and leadership, not only visual output.""",
+    how:
+        r"""They work best with specific stories using situation, problem, action, trade-off, result, and learning.""",
+    where:
+        r"""I connect these answers to 20+ years across industrial design, CAD/CAM, manufacturing, Flutter, 4iCAD, and ASD workflow tools.""",
+    tradeoffs:
+        r"""The trade-off is confidence versus humility. Strong answers show ownership without pretending every project was perfect.""",
+    limitations:
+        r"""Behavioral answers sound generic when they are not grounded in real examples.""",
+    answer:
+        r"""My behavioral interview strategy is to show that I am a senior designer who understands real production workflows, communicates across teams, and turns unclear pain points into practical product solutions.""",
+  ),
+];
+
+final Topic kProductDesignInterviewQuestions = Topic(
+  id: r"""pd_interview_questions""",
+  label: r"""Product Design Q&A""",
+  icon: r"""QA""",
+  colorValue: 0xFF4A5568,
+  sections: [
+    LevelSection(
+      level: r"""product""",
+      title: r"""Senior Interview Answers""",
+      points: [
+        _pdBehavior(
+            r"""Tell me about yourself.""",
+            r"""I am a senior product designer with 20+ years across industrial design, CAD/CAM, prototyping, manufacturing, and Flutter app development.""",
+            r"""I am a senior product designer with a practical background that combines physical product design and digital product development. For more than 20 years I have worked with concept design, 3D modeling, drawings, manufacturing, clients, installers, and production teams. More recently I added Flutter development, which helps me design with a stronger understanding of implementation. My strength is turning real workflow pain into tools people can actually use, such as 4iCAD and Absolute Stone Design workflow tools."""),
+        _pdBehavior(
+            r"""What is your design process?""",
+            r"""I start with the problem, understand users and constraints, prototype options, validate, then work with developers to ship and improve.""",
+            r"""My process starts by clarifying the user, business goal, and real workflow constraint. Then I define the problem, map the journey, explore options, prototype the strongest direction, validate it with users or stakeholders, and work with developers through implementation. I do not treat design as a handoff; I stay involved through QA and iteration because the product only matters when it works in the real workflow."""),
+        _pdBehavior(
+            r"""How do you define a user problem?""",
+            r"""I define who is affected, what task is blocked, why it matters, and what better outcome would look like.""",
+            r"""I define a user problem by separating symptoms from root causes. I ask who has the problem, what they are trying to do, where the workflow breaks, how often it happens, and what the business impact is. In production workflows, the problem may not be a missing button; it may be unclear handoff information that creates rework later."""),
+        _pdBehavior(
+            r"""How do you validate a design?""",
+            r"""I validate with prototypes, user feedback, task completion, stakeholder review, and measurable outcomes after launch.""",
+            r"""I choose validation based on risk. Early on, I may use quick prototypes and stakeholder walkthroughs. For important flows, I test whether users can complete the task, understand the information, and avoid mistakes. After launch, I look at behavior, support issues, error rates, time saved, and qualitative feedback."""),
+        _pdBehavior(
+            r"""How do you work with developers?""",
+            r"""I involve developers early, explain intent, document states and edge cases, and adjust trade-offs without losing the user goal.""",
+            r"""I work with developers as partners. I bring the user problem, workflow, design intent, component states, and edge cases, then ask for technical constraints early. Because I build Flutter apps myself, I understand implementation cost and can make practical decisions. I care about design quality, but I also care about maintainable code and realistic delivery."""),
+        _pdBehavior(
+            r"""How do you handle unclear requirements?""",
+            r"""I turn ambiguity into questions, assumptions, risks, and small testable decisions.""",
+            r"""When requirements are unclear, I do not jump straight into screens. I clarify the goal, user, constraints, success measure, and known risks. If answers are missing, I write assumptions and create a prototype or workflow map to make the ambiguity visible. That helps stakeholders react to something concrete."""),
+        _pdBehavior(
+            r"""How do you handle stakeholder feedback?""",
+            r"""I listen for the concern behind the feedback and connect the discussion back to user and business goals.""",
+            r"""I take stakeholder feedback seriously, but I try to understand the reason behind it. Sometimes feedback reveals a business constraint, and sometimes it is personal preference. I bring the conversation back to the user goal, evidence, and impact. If there is disagreement, I propose a test or a smaller decision that helps us learn."""),
+        _pdBehavior(
+            r"""How do you measure design success?""",
+            r"""I measure whether users complete important tasks better and whether the product creates business value.""",
+            r"""Design success depends on the product goal. It can mean higher activation, faster task completion, fewer errors, fewer support calls, better retention, or reduced production rework. In workflow products, success often means less confusion, fewer handoff mistakes, and faster decisions. I combine metrics with user feedback because numbers alone do not explain why behavior changed."""),
+        _pdBehavior(
+            r"""How do you balance user needs and business goals?""",
+            r"""I look for solutions where user value supports business value, then make trade-offs explicit when they conflict.""",
+            r"""I start by understanding both sides. Users need clarity, speed, trust, and control; the business needs growth, efficiency, retention, or revenue. The best product decisions usually serve both. When they conflict, I make the trade-off visible and discuss risk, impact, and alternatives instead of treating design as only user preference."""),
+        _pdBehavior(
+            r"""What makes a good product?""",
+            r"""A good product solves a real problem clearly, reliably, and in a way users can fit into their workflow.""",
+            r"""A good product solves a meaningful problem, is easy to understand, performs reliably, and creates value for both users and the business. Good product design is not only visual polish. It is the full experience: workflow, information, performance, trust, support, and whether the product still works under real-world pressure."""),
+        _pdBehavior(
+            r"""What is the difference between UX and UI?""",
+            r"""UX is the full experience and workflow; UI is the interface users see and interact with.""",
+            r"""UX is about the user's journey, task, problem, structure, flow, and outcome. UI is the visual and interactive layer: layout, typography, components, color, states, and feedback. They are connected. A beautiful UI cannot save a broken workflow, and a strong UX still needs clear UI to be usable."""),
+        _pdBehavior(
+            r"""How do you build a design system?""",
+            r"""I start with foundations, then components, states, accessibility rules, documentation, and developer alignment.""",
+            r"""I build a design system from real product patterns. First I define foundations like color, type, spacing, radius, and accessibility. Then I create reusable components with states, usage rules, and code alignment. The system should help designers and developers ship consistent work faster, not become a library nobody maintains."""),
+        _pdBehavior(
+            r"""How do you design for accessibility?""",
+            r"""I design accessibility from the start: contrast, text scale, semantic labels, keyboard/focus, touch targets, and clear errors.""",
+            r"""I treat accessibility as product quality. I check contrast, readable typography, scalable layouts, semantic labels for icon-only controls, keyboard and focus behavior, clear error messages, and minimum touch targets. Accessibility helps everyone, especially in complex workflows."""),
+        _pdBehavior(
+            r"""How do you present a case study?""",
+            r"""I present context, problem, role, process, decisions, trade-offs, outcome, and learning.""",
+            r"""I present a case study as a product story. I start with context and the user problem, explain my role and constraints, show the process and key decisions, discuss trade-offs, and end with outcome and learning. I avoid only showing final screens because hiring teams need to understand how I think."""),
+        _pdBehavior(
+            r"""Tell me about a failed design.""",
+            r"""I explain what did not work, what I learned, and how I changed the approach.""",
+            r"""A failed design is valuable when it teaches you something. I have seen ideas that looked clear in design but did not match the real workflow once stakeholders or users walked through them. My response is to identify the wrong assumption, simplify the direction, and validate earlier next time. I do not hide failure; I use it to improve the product."""),
+        _pdBehavior(
+            r"""Tell me about a difficult stakeholder.""",
+            r"""I focus on the underlying concern, create alignment around goals, and use evidence or prototypes to move forward.""",
+            r"""With a difficult stakeholder, I first try to understand what they are protecting: timeline, budget, risk, brand, operations, or personal accountability. Then I move the discussion from opinion to product goals and evidence. Prototypes are useful because they make abstract disagreement concrete."""),
+        _pdBehavior(
+            r"""Why should we hire you?""",
+            r"""You should hire me because I combine senior design judgment, real production experience, and enough technical understanding to work deeply with developers.""",
+            r"""You should hire me because I bring a rare combination: over 20 years of product and industrial design, CAD/CAM and manufacturing experience, client and production workflow knowledge, and Flutter development. I can understand users, design practical workflows, communicate with developers, and think about the full product from concept to implementation."""),
+        _pdBehavior(
+            r"""What makes you different from other product designers?""",
+            r"""I understand both physical production workflows and digital implementation, which helps me design practical tools, not just screens.""",
+            r"""What makes me different is the range of my experience. I have designed physical products, worked with CAD tools like SolidWorks, CATIA, AutoCAD, and Inventor, handled manufacturing and drawings, worked with clients and production teams, and now build Flutter apps. That gives me a very practical design perspective. I can connect user pain, business workflow, and technical execution."""),
+      ],
+    ),
+  ],
+);
+
+final List<Topic> kProductDesignAllTopics = [
+  ...kProductDesignTopics,
+  kProductDesignInterviewQuestions,
+];
+
+final List<AppTrack> kTracks = [
+  AppTrack(
+    id: r"""flutter""",
+    label: r"""Flutter Development""",
+    icon: r"""FL""",
+    description:
+        r"""Senior Flutter, Dart, architecture, performance, testing, commands, and app delivery.""",
+    colorValue: 0xFF4F6AF0,
+    topics: kTopics,
+  ),
+  AppTrack(
+    id: r"""product_design""",
+    label: r"""Product Design""",
+    icon: r"""PD""",
+    description:
+        r"""Senior product design, UX, design systems, accessibility, strategy, portfolio, and interview answers.""",
+    colorValue: 0xFF805AD5,
+    topics: kProductDesignAllTopics,
   ),
 ];

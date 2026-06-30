@@ -9,6 +9,8 @@ import '../services/window_transparency/window_transparency.dart';
 
 const List<double> kFontSteps = [0.85, 1.0, 1.15, 1.3, 1.45];
 
+enum AnswerMode { shortAnswer, detailedAnswer, interviewAnswer }
+
 const List<int> kTextColorOptions = [
   0xFFF7FAFC,
   0xFF000000,
@@ -95,7 +97,8 @@ class _VisiblePoint {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String activeTopicId = kTopics.first.id;
+  String? activeTrackId;
+  String activeTopicId = kTracks.first.topics.first.id;
   int fontStepIndex = 1;
   int? expandedIndex;
   bool stickerMode = false;
@@ -115,10 +118,12 @@ class _HomeScreenState extends State<HomeScreen> {
   _VisiblePoint? interviewPoint;
   final Set<String> favorites = <String>{};
   final Map<String, int> confidence = <String, int>{};
+  final Map<String, String> notes = <String, String>{};
   final TextEditingController searchController = TextEditingController();
   String? speakingPointId;
   String? speakingSectionKey;
   int readerRunId = 0;
+  AnswerMode answerMode = AnswerMode.detailedAnswer;
 
   double get scale => kFontSteps[fontStepIndex];
   double fs(double px) => px * scale;
@@ -149,7 +154,12 @@ class _HomeScreenState extends State<HomeScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
       );
 
-  Topic get activeTopic => kTopics.firstWhere((t) => t.id == activeTopicId);
+  AppTrack? get activeTrack => activeTrackId == null
+      ? null
+      : kTracks.firstWhere((track) => track.id == activeTrackId);
+  List<Topic> get activeTopics => activeTrack?.topics ?? kTracks.first.topics;
+  Topic get activeTopic =>
+      activeTopics.firstWhere((t) => t.id == activeTopicId);
 
   @override
   void initState() {
@@ -200,6 +210,15 @@ class _HomeScreenState extends State<HomeScreen> {
           confidence[parts[0]] = int.tryParse(parts[1]) ?? 0;
         }
       }
+      final noteRows = prefs.getStringList('notes') ?? const [];
+      notes.clear();
+      for (final row in noteRows) {
+        final splitAt = row.indexOf('|');
+        if (splitAt > 0) {
+          notes[row.substring(0, splitAt)] =
+              Uri.decodeComponent(row.substring(splitAt + 1));
+        }
+      }
     });
   }
 
@@ -219,7 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<_VisiblePoint> get _allVisiblePoints {
     final rows = <_VisiblePoint>[];
-    for (final topic in kTopics) {
+    for (final topic in activeTopics) {
       for (final section in topic.sections) {
         for (var i = 0; i < section.points.length; i++) {
           rows.add(_VisiblePoint(
@@ -264,6 +283,37 @@ class _HomeScreenState extends State<HomeScreen> {
       activeTopicId = id;
       expandedIndex = null;
       interviewMode = false;
+      speakingPointId = null;
+      speakingSectionKey = null;
+      searchQuery = '';
+      searchController.clear();
+    });
+  }
+
+  void _selectTrack(AppTrack track) {
+    readerRunId++;
+    TextReaderService.stop();
+    setState(() {
+      activeTrackId = track.id;
+      activeTopicId = track.topics.first.id;
+      expandedIndex = null;
+      interviewMode = false;
+      readingMode = false;
+      speakingPointId = null;
+      speakingSectionKey = null;
+      searchQuery = '';
+      searchController.clear();
+    });
+  }
+
+  void _showTrackMenu() {
+    readerRunId++;
+    TextReaderService.stop();
+    setState(() {
+      activeTrackId = null;
+      expandedIndex = null;
+      interviewMode = false;
+      readingMode = false;
       speakingPointId = null;
       speakingSectionKey = null;
       searchQuery = '';
@@ -411,14 +461,41 @@ class _HomeScreenState extends State<HomeScreen> {
     _clearSpeakingPoint();
   }
 
+  String _answerText(ConceptPoint point) {
+    switch (answerMode) {
+      case AnswerMode.shortAnswer:
+        return point.shortAnswer ?? point.explanation;
+      case AnswerMode.detailedAnswer:
+        return point.detailedAnswer ?? point.explanation;
+      case AnswerMode.interviewAnswer:
+        return point.interviewAnswer ?? point.explanation;
+    }
+  }
+
+  String _answerModeTitle() {
+    switch (answerMode) {
+      case AnswerMode.shortAnswer:
+        return 'Short answer';
+      case AnswerMode.detailedAnswer:
+        return 'Detailed answer';
+      case AnswerMode.interviewAnswer:
+        return 'Interview answer';
+    }
+  }
+
+  void _setNote(String id, String value) {
+    notes[id] = value;
+    _savePrefs();
+  }
+
   String _readerText(_VisiblePoint row) {
     final point = row.point;
     final buffer = StringBuffer()
       ..write(point.question)
       ..write('. ')
-      ..write(point.explanation);
+      ..write(_answerText(point));
 
-    if (point.code.isNotEmpty) {
+    if (point.code.isNotEmpty && activeTrackId == 'flutter') {
       buffer
         ..write(' A simple way to say it in an interview is: ')
         ..write(_speechFriendlyCode(point.code));
@@ -468,6 +545,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (activeTrackId == null) return _buildTrackMenu();
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
@@ -481,6 +560,7 @@ class _HomeScreenState extends State<HomeScreen> {
           drawer: isDesktop || readingMode
               ? null
               : _TopicDrawer(
+                  topics: activeTopics,
                   activeTopicId: activeTopicId,
                   onSelect: (id) {
                     Navigator.of(context).maybePop();
@@ -510,6 +590,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 if (isDesktop && !readingMode)
                   _DesktopSidebar(
+                      topics: activeTopics,
                       activeTopicId: activeTopicId,
                       onSelect: _selectTopic,
                       fs: fs,
@@ -558,6 +639,114 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildTrackMenu() {
+    return Scaffold(
+      backgroundColor: backgroundColor,
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 980),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Interview Prep Tracks',
+                      style: TextStyle(
+                          fontSize: fs(30),
+                          fontWeight: FontWeight.bold,
+                          color: textColor)),
+                  const SizedBox(height: 8),
+                  Text('Choose what you want to study today.',
+                      style: TextStyle(
+                          fontSize: fs(15),
+                          color: secondaryTextColor,
+                          height: 1.45)),
+                  const SizedBox(height: 22),
+                  LayoutBuilder(builder: (context, constraints) {
+                    final isWide = constraints.maxWidth >= 720;
+                    return Wrap(
+                      spacing: 16,
+                      runSpacing: 16,
+                      children: kTracks
+                          .map((track) => SizedBox(
+                                width: isWide
+                                    ? (constraints.maxWidth - 16) / 2
+                                    : constraints.maxWidth,
+                                child: _trackChoiceCard(track),
+                              ))
+                          .toList(),
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _trackChoiceCard(AppTrack track) {
+    final color = Color(track.colorValue);
+    return Material(
+      color: cardColor,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => _selectTrack(track),
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 190),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: buttonBorderColor),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 54,
+                height: 54,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: color.withValues(alpha: 0.72)),
+                ),
+                child: Center(
+                  child: Text(track.icon,
+                      style: TextStyle(
+                          color: textColor,
+                          fontSize: fs(16),
+                          fontWeight: FontWeight.bold)),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(track.label,
+                  style: TextStyle(
+                      color: textColor,
+                      fontSize: fs(22),
+                      fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text(track.description,
+                  style: TextStyle(
+                      color: secondaryTextColor,
+                      fontSize: fs(14),
+                      height: 1.45)),
+              const SizedBox(height: 14),
+              Text('${track.topics.length} categories',
+                  style: TextStyle(
+                      color: mutedTextColor,
+                      fontSize: fs(12.5),
+                      fontWeight: FontWeight.w700)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   double _maxContentWidth(double width) {
     if (width >= 1400) return 1080;
     if (width >= 900) return 940;
@@ -584,10 +773,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Text('🎯', style: TextStyle(fontSize: fs(compact ? 24 : 30))),
               const SizedBox(width: 12),
               Expanded(
-                  child: Text(
-                      compact
-                          ? 'Senior Flutter Interview Handbook'
-                          : 'Flutter Senior Interview Prep',
+                  child: Text(compact ? activeTrack!.label : ' Interview Prep',
                       style: TextStyle(
                           fontSize: fs(compact ? 20 : 26),
                           fontWeight: FontWeight.bold,
@@ -596,8 +782,7 @@ class _HomeScreenState extends State<HomeScreen> {
               if (!compact) _buildTopControls(),
             ]),
             const SizedBox(height: 8),
-            Text(
-                'Interview companion with responsive layout, desktop sticker mode, search, bookmarks, reading mode, and mock interview mode.',
+            Text(activeTrack!.description,
                 style: TextStyle(
                     fontSize: fs(14), color: secondaryTextColor, height: 1.45)),
             const SizedBox(height: 14),
@@ -665,6 +850,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         _actionChip(
+            icon: Icons.apps,
+            label: 'Tracks',
+            selected: false,
+            onTap: _showTrackMenu),
+        _buildAnswerModeFilter(),
+        _actionChip(
             icon: Icons.menu_book,
             label: readingMode ? 'Exit Reading' : 'Reading',
             selected: readingMode,
@@ -676,6 +867,22 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: _startInterviewMode),
       ],
     );
+  }
+
+  Widget _buildAnswerModeFilter() {
+    return Wrap(spacing: 6, runSpacing: 6, children: [
+      _answerModeChip(AnswerMode.shortAnswer, 'Short'),
+      _answerModeChip(AnswerMode.detailedAnswer, 'Detailed'),
+      _answerModeChip(AnswerMode.interviewAnswer, 'Interview'),
+    ]);
+  }
+
+  Widget _answerModeChip(AnswerMode mode, String label) {
+    return _actionChip(
+        icon: answerMode == mode ? Icons.check : Icons.notes,
+        label: label,
+        selected: answerMode == mode,
+        onTap: () => setState(() => answerMode = mode));
   }
 
   Widget _buildTopControls({bool compact = false}) {
@@ -997,10 +1204,10 @@ class _HomeScreenState extends State<HomeScreen> {
       height: 46,
       child: ListView.separated(
           scrollDirection: Axis.horizontal,
-          itemCount: kTopics.length,
+          itemCount: activeTopics.length,
           separatorBuilder: (_, __) => const SizedBox(width: 8),
           itemBuilder: (context, index) {
-            final topic = kTopics[index];
+            final topic = activeTopics[index];
             return _TopicPill(
                 topic: topic,
                 isActive: topic.id == activeTopicId,
@@ -1293,17 +1500,41 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 8),
             _readAloudRow(row),
             const SizedBox(height: 14),
-            _sectionLabel('EXPLANATION'),
+            _sectionLabel(_answerModeTitle().toUpperCase()),
             const SizedBox(height: 8),
-            Text(point.explanation,
+            Text(_answerText(point),
                 style: TextStyle(
                     fontSize: fs(readingMode ? 17 : 15),
                     color: textColor,
                     height: 1.65)),
             const SizedBox(height: 12),
             _confidenceBar(row.id, conf),
+            const SizedBox(height: 14),
+            _sectionLabel('NOTES'),
+            const SizedBox(height: 8),
+            TextFormField(
+              initialValue: notes[row.id] ?? '',
+              minLines: 2,
+              maxLines: 4,
+              onChanged: (value) => _setNote(row.id, value),
+              style: TextStyle(color: textColor, fontSize: fs(13.5)),
+              decoration: InputDecoration(
+                hintText: 'Add your own example or reminder...',
+                hintStyle: TextStyle(color: mutedTextColor),
+                filled: true,
+                fillColor: cardColor,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: cardBorderColor),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: cardBorderColor),
+                ),
+              ),
+            ),
           ])),
-      if (point.code.isNotEmpty)
+      if (point.code.isNotEmpty && activeTrackId == 'flutter')
         Container(
             width: double.infinity,
             decoration: BoxDecoration(
@@ -1452,6 +1683,7 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class _DesktopSidebar extends StatelessWidget {
+  final List<Topic> topics;
   final String activeTopicId;
   final ValueChanged<String> onSelect;
   final double Function(double) fs;
@@ -1460,6 +1692,7 @@ class _DesktopSidebar extends StatelessWidget {
   final Color menuSurfaceColor;
 
   const _DesktopSidebar({
+    required this.topics,
     required this.activeTopicId,
     required this.onSelect,
     required this.fs,
@@ -1484,13 +1717,13 @@ class _DesktopSidebar extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
             child:
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('🎯 Flutter Prep',
+              Text('Interview Prep',
                   style: TextStyle(
                       fontSize: fs(20),
                       fontWeight: FontWeight.bold,
                       color: menuTextColor)),
               const SizedBox(height: 4),
-              Text('Senior interview map',
+              Text('Topic map',
                   style: TextStyle(
                       fontSize: fs(12.5), color: menuSecondaryTextColor)),
             ]),
@@ -1498,10 +1731,10 @@ class _DesktopSidebar extends StatelessWidget {
           Expanded(
             child: ListView.separated(
               padding: const EdgeInsets.fromLTRB(10, 4, 10, 14),
-              itemCount: kTopics.length,
+              itemCount: topics.length,
               separatorBuilder: (_, __) => const SizedBox(height: 4),
               itemBuilder: (context, index) {
-                final topic = kTopics[index];
+                final topic = topics[index];
                 return _TopicTile(
                   topic: topic,
                   isActive: topic.id == activeTopicId,
@@ -1519,6 +1752,7 @@ class _DesktopSidebar extends StatelessWidget {
 }
 
 class _TopicDrawer extends StatelessWidget {
+  final List<Topic> topics;
   final String activeTopicId;
   final ValueChanged<String> onSelect;
   final double Function(double) fs;
@@ -1527,6 +1761,7 @@ class _TopicDrawer extends StatelessWidget {
   final Color menuSurfaceColor;
 
   const _TopicDrawer({
+    required this.topics,
     required this.activeTopicId,
     required this.onSelect,
     required this.fs,
@@ -1549,7 +1784,7 @@ class _TopicDrawer extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: menuTextColor)),
           ),
-          ...kTopics.map((topic) => Padding(
+          ...topics.map((topic) => Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: _TopicTile(
                   topic: topic,
