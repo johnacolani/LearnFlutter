@@ -564,6 +564,16 @@ setState(() {});""",
             code: r"""State → Build → Layout → Paint → Layers → Engine → GPU""",
           ),
           ConceptPoint(
+            question: r"""Accessibility and Semantics""",
+            explanation:
+                r"""Flutter builds a semantics tree in addition to the widget/render tree. A normal Text or ElevatedButton usually exposes meaning automatically, but custom UI often does not. For example, if you build a round icon-only checkout button, a screen reader may only announce "button" unless you provide a label like "Submit order". Semantics lets you describe what the user can do, not just what pixels are drawn.""",
+            code: r"""Semantics(
+  label: 'Submit order',
+  button: true,
+  child: IconButton(...),
+)""",
+          ),
+          ConceptPoint(
             question: r"""Layout Phase""",
             explanation:
                 r"""During layout, constraints flow from parent to child. Each RenderObject chooses a size within those constraints and reports it back to the parent.""",
@@ -581,6 +591,14 @@ setState(() {});""",
         level: r"""senior""",
         title: r"""Senior Depth""",
         points: [
+          ConceptPoint(
+            question: r"""Semantics best practices""",
+            explanation:
+                r"""Use Semantics when meaning is missing or duplicated. Real examples: add a label to an icon-only favorite button, mark a custom card as selected, merge a price and currency label so they are read as one value, and exclude decorative icons that add noise. Accessibility is also layout work: support large text, keep controls reachable by keyboard/focus traversal, and test with TalkBack on Android and VoiceOver on iOS.""",
+            code: r"""ExcludeSemantics: hide duplicate noise
+MergeSemantics: combine related children
+Semantics: add missing meaning""",
+          ),
           ConceptPoint(
             question: r"""Layer Tree and Compositing""",
             explanation:
@@ -628,6 +646,14 @@ setState(() {});""",
             code: r"""State holder → UI watches → rebuild affected parts""",
           ),
           ConceptPoint(
+            question: r"""Popular state packages""",
+            explanation:
+                r"""Common Flutter state management packages include provider, flutter_bloc, and flutter_riverpod. Use provider when you want a simple object exposed to a subtree, such as SettingsController or CartModel. Use flutter_bloc when a feature has clear user events and states, such as LoginPressed -> Loading -> Success or Failure. Use flutter_riverpod when you want providers that are testable, overrideable, and not tied to BuildContext, such as auth state, repositories, and async API data.""",
+            code: r"""provider: simple dependency exposure
+flutter_bloc: Event -> Bloc -> State
+flutter_riverpod: ref.watch(provider)""",
+          ),
+          ConceptPoint(
             question: r"""ChangeNotifier""",
             explanation:
                 r"""ChangeNotifier is a simple observable object. It stores mutable state and calls notifyListeners() when listeners should rebuild.""",
@@ -642,6 +668,28 @@ setState(() {});""",
         level: r"""senior""",
         title: r"""Senior Depth""",
         points: [
+          ConceptPoint(
+            question: r"""Provider vs Bloc vs Riverpod""",
+            explanation:
+                r"""Provider is lightweight and good for dependency injection or simple shared state. Example: expose ThemeController so any screen can switch dark mode. Bloc is stronger for workflow-heavy features where every change should be explicit and traceable. Example: checkout has AddCoupon, PayPressed, PaymentSucceeded, PaymentFailed. Riverpod is strong for testability and async dependencies. Example: override userRepositoryProvider in a widget test without building a special inherited widget tree.""",
+            code: r"""Provider: context.watch<T>()
+Bloc: BlocBuilder<AuthBloc, AuthState>
+Riverpod: ref.watch(authProvider)""",
+          ),
+          ConceptPoint(
+            question: r"""Bloc in interviews""",
+            explanation:
+                r"""Bloc separates input events from output states. The UI does not directly run the login workflow; it dispatches LoginSubmitted. The Bloc validates input, calls the repository, catches failures, and emits LoginLoading, LoginSuccess, or LoginFailure. This is easy to test because you can feed events and expect states. The trade-off is boilerplate, so Bloc is best when the workflow is complex enough to deserve that structure.""",
+            code: r"""LoginPressed -> AuthBloc -> Loading/Success/Failure""",
+          ),
+          ConceptPoint(
+            question: r"""Riverpod in interviews""",
+            explanation:
+                r"""Riverpod treats providers as independent, composable units. A screen can watch userProvider for async user data, while userProvider depends on userRepoProvider. In tests you can override userRepoProvider with a fake. In real apps this keeps API clients, repositories, auth state, feature flags, and cached async values organized without passing BuildContext around.""",
+            code: r"""final userProvider = FutureProvider((ref) {
+  return ref.watch(userRepoProvider).loadUser();
+});""",
+          ),
           ConceptPoint(
             question: r"""Provider""",
             explanation:
@@ -682,6 +730,13 @@ setState(() {});""",
             code: r"""Presentation → Application/UseCases → Domain → Data""",
           ),
           ConceptPoint(
+            question: r"""Error handling strategy""",
+            explanation:
+                r"""Good Flutter error handling separates expected failures from programmer bugs. Expected failures are part of the product flow: invalid password, no internet, permission denied, payment declined, or server validation errors. Convert those into typed states or Failure objects so the UI can show a clear message and retry action. Unexpected exceptions, such as null assumptions, parsing bugs, or plugin crashes, should keep the stack trace and go to monitoring.""",
+            code: r"""Expected: Result/Failure -> UI message
+Unexpected: exception + stackTrace -> report""",
+          ),
+          ConceptPoint(
             question: r"""Repository Pattern""",
             explanation:
                 r"""A repository hides where data comes from. The UI asks for data through an interface instead of depending directly on Firebase, REST, local database, or cache.""",
@@ -700,6 +755,24 @@ setState(() {});""",
         level: r"""senior""",
         title: r"""Senior Depth""",
         points: [
+          ConceptPoint(
+            question: r"""Global Flutter error handling""",
+            explanation:
+                r"""Production apps usually wire FlutterError.onError for framework errors and PlatformDispatcher.instance.onError for uncaught async errors. That catches errors that escape widgets, futures, and platform callbacks. Still use local try/catch where recovery belongs. Example: a profile screen should catch a 404 or timeout and show an empty/error state; a global handler should record the stack trace for issues the screen cannot safely recover from.""",
+            code: r"""FlutterError.onError = (details) { ... };
+PlatformDispatcher.instance.onError = (error, stack) {
+  report(error, stack);
+  return true;
+};""",
+          ),
+          ConceptPoint(
+            question: r"""Popular error reporting packages""",
+            explanation:
+                r"""Common Flutter crash and error reporting choices include firebase_crashlytics, sentry_flutter, and bugsnag_flutter. Crashlytics fits Firebase-heavy apps and mobile crash dashboards. Sentry is strong when you want cross-platform errors, stack traces, breadcrumbs, release tracking, and performance tracing. Bugsnag is another mature crash/error monitoring option. In interviews, mention that reporting is not enough: add user/session context, app version, environment, and breadcrumbs like "opened checkout" or "payment failed".""",
+            code: r"""firebase_crashlytics: Firebase crash reports
+sentry_flutter: errors + traces + breadcrumbs
+bugsnag_flutter: crash/error monitoring""",
+          ),
           ConceptPoint(
             question: r"""Dependency Inversion""",
             explanation:
@@ -886,6 +959,21 @@ WebSocket: server pushes""",
                 r"""Use MethodChannel for platform SDK APIs in Kotlin/Swift. Use FFI when calling C-compatible native libraries directly. FFI is better for performance-critical native libraries but not for normal Android/iOS SDK calls.""",
             code: r"""Platform SDK → MethodChannel
 C library → FFI""",
+          ),
+          ConceptPoint(
+            question: r"""FFIgen""",
+            explanation:
+                r"""ffigen generates Dart FFI bindings from C header files. Without ffigen, you manually write Pointer, Struct, typedef, and DynamicLibrary lookup code, which is slow and error-prone. With ffigen, you configure the header paths, include filters, and output file, then generate a typed Dart wrapper. A real example is a Flutter CAD app calling a C geometry library: Dart passes coordinates to native code, native code computes intersections or offsets, and Dart receives the result without a MethodChannel round trip.""",
+            code: r"""headers: native_lib.h
+ffigen -> generated_bindings.dart
+Dart -> DynamicLibrary -> C API""",
+          ),
+          ConceptPoint(
+            question: r"""When to use FFIgen""",
+            explanation:
+                r"""Use ffigen when the thing you need already has a C-compatible API: a CAD kernel, image processing library, audio engine, crypto library, or device SDK that ships headers and native binaries. It is not the right tool for normal Android/iOS SDK APIs like CameraManager or CLLocationManager because those are Kotlin/Java/Swift/Obj-C platform APIs; use a plugin or MethodChannel there. The interview rule is: C headers and native library -> FFI/ffigen; platform service API -> plugin/channel.""",
+            code: r"""C headers available -> ffigen
+Kotlin/Swift SDK only -> plugin/channel""",
           ),
           ConceptPoint(
             question: r"""Phillips-style answer""",
