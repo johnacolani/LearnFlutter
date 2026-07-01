@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
+
+import 'package:flutter_interview_prep/screens/home_screen.dart';
 import 'services/window_transparency/window_transparency.dart';
 
 Future<void> main() async {
