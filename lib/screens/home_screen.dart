@@ -120,6 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final Map<String, int> confidence = <String, int>{};
   final Map<String, String> notes = <String, String>{};
   final TextEditingController searchController = TextEditingController();
+  final ScrollController contentScrollController = ScrollController();
   String? speakingPointId;
   String? speakingSectionKey;
   int readerRunId = 0;
@@ -188,6 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     TextReaderService.stop();
     searchController.dispose();
+    contentScrollController.dispose();
     super.dispose();
   }
 
@@ -524,6 +526,18 @@ class _HomeScreenState extends State<HomeScreen> {
     _savePrefs();
   }
 
+  void _scrollCardIntoView(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Scrollable.ensureVisible(
+        context,
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.easeInOut,
+        alignment: 0.08,
+      );
+    });
+  }
+
   String _readerText(_VisiblePoint row) {
     final point = row.point;
     final buffer = StringBuffer()
@@ -636,6 +650,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Expanded(
                   child: SelectionArea(
                     child: CustomScrollView(
+                      controller: contentScrollController,
                       slivers: [
                         if (!readingMode)
                           SliverToBoxAdapter(
@@ -1408,106 +1423,145 @@ class _HomeScreenState extends State<HomeScreen> {
     final isSpeaking = speakingPointId == row.id;
     final conf = confidence[row.id] ?? 0;
     final shouldShowAnswer = !interviewMode || showInterviewAnswer;
-    return Container(
-      decoration: BoxDecoration(
-          color: cardColor,
-          border: Border.all(
+
+    return Builder(
+      builder: (cardContext) {
+        return Container(
+          decoration: BoxDecoration(
+            color: cardColor,
+            border: Border.all(
               color: isOpen
                   ? topicColor.withValues(alpha: 0.48)
-                  : cardBorderColor),
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            if (isOpen)
-              BoxShadow(
+                  : cardBorderColor,
+            ),
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              if (isOpen)
+                BoxShadow(
                   color: topicColor.withValues(alpha: 0.08),
                   blurRadius: 20,
-                  offset: const Offset(0, 8))
-          ]),
-      clipBehavior: Clip.antiAlias,
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Material(
-            color: Colors.transparent,
-            child: InkWell(
-                onTap: readingMode
-                    ? null
-                    : () => setState(
-                        () => expandedIndex = isOpen ? null : displayIndex),
-                child: Padding(
+                  offset: const Offset(0, 8),
+                ),
+            ],
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: readingMode
+                      ? null
+                      : () {
+                          final willOpen = !isOpen;
+                          setState(() {
+                            expandedIndex = willOpen ? displayIndex : null;
+                          });
+                          if (willOpen) _scrollCardIntoView(cardContext);
+                        },
+                  child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                  color: topicColor.withValues(alpha: 0.2),
-                                  shape: BoxShape.circle),
-                              child: Center(
-                                  child: Text('${displayIndex + 1}',
-                                      style: TextStyle(
-                                          fontSize: fs(13),
-                                          fontWeight: FontWeight.bold,
-                                          color: topicColor)))),
-                          const SizedBox(width: 12),
-                          Expanded(
-                              child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                if (searchQuery.isNotEmpty || interviewMode)
-                                  Text(
-                                      '${row.topic.icon} ${row.topic.label} â€¢ ${row.section.title}',
-                                      style: TextStyle(
-                                          fontSize: fs(11.5),
-                                          color: secondaryTextColor,
-                                          fontWeight: FontWeight.w700)),
-                                Text(row.point.question,
-                                    style: TextStyle(
-                                        fontSize: fs(readingMode ? 20 : 16),
-                                        fontWeight: FontWeight.w700,
-                                        color: textColor,
-                                        height: 1.35)),
-                              ])),
-                          IconButton(
-                              style: iconButtonStyle,
-                              tooltip: 'Favorite',
-                              icon: Icon(isFav ? Icons.star : Icons.star_border,
-                                  color: isFav
-                                      ? const Color(0xFFF59E0B)
-                                      : mutedTextColor),
-                              onPressed: () => _toggleFavorite(row.id)),
-                          IconButton(
-                              style: iconButtonStyle,
-                              tooltip: isSpeaking
-                                  ? 'Stop reading'
-                                  : 'Read naturally',
-                              icon: Icon(
-                                  isSpeaking
-                                      ? Icons.stop_circle_outlined
-                                      : Icons.record_voice_over_outlined,
-                                  color: isSpeaking
-                                      ? const Color(0xFF10B981)
-                                      : mutedTextColor),
-                              onPressed: () {
-                                _toggleReadAloud(row);
-                              }),
-                          if (!readingMode)
-                            Icon(
-                                isOpen
-                                    ? Icons.keyboard_arrow_up
-                                    : Icons.keyboard_arrow_down,
-                                color: mutedTextColor),
-                        ])))),
-        AnimatedCrossFade(
-            firstChild: const SizedBox.shrink(),
-            secondChild: shouldShowAnswer
-                ? _buildExpandedContent(row, conf)
-                : _hiddenAnswer(),
-            crossFadeState:
-                isOpen ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-            duration: const Duration(milliseconds: 180),
-            sizeCurve: Curves.easeOut),
-      ]),
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: topicColor.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              '${displayIndex + 1}',
+                              style: TextStyle(
+                                fontSize: fs(13),
+                                fontWeight: FontWeight.bold,
+                                color: topicColor,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (searchQuery.isNotEmpty || interviewMode)
+                                Text(
+                                  '${row.topic.icon} ${row.topic.label} • ${row.section.title}',
+                                  style: TextStyle(
+                                    fontSize: fs(11.5),
+                                    color: secondaryTextColor,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              Text(
+                                row.point.question,
+                                style: TextStyle(
+                                  fontSize: fs(readingMode ? 20 : 16),
+                                  fontWeight: FontWeight.w700,
+                                  color: textColor,
+                                  height: 1.35,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          style: iconButtonStyle,
+                          tooltip: 'Favorite',
+                          icon: Icon(
+                            isFav ? Icons.star : Icons.star_border,
+                            color: isFav
+                                ? const Color(0xFFF59E0B)
+                                : mutedTextColor,
+                          ),
+                          onPressed: () => _toggleFavorite(row.id),
+                        ),
+                        IconButton(
+                          style: iconButtonStyle,
+                          tooltip: isSpeaking
+                              ? 'Stop reading'
+                              : 'Read naturally',
+                          icon: Icon(
+                            isSpeaking
+                                ? Icons.stop_circle_outlined
+                                : Icons.record_voice_over_outlined,
+                            color: isSpeaking
+                                ? const Color(0xFF10B981)
+                                : mutedTextColor,
+                          ),
+                          onPressed: () => _toggleReadAloud(row),
+                        ),
+                        if (!readingMode)
+                          Icon(
+                            isOpen
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            color: mutedTextColor,
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              AnimatedCrossFade(
+                firstChild: const SizedBox.shrink(),
+                secondChild: shouldShowAnswer
+                    ? _buildExpandedContent(row, conf)
+                    : _hiddenAnswer(),
+                crossFadeState: isOpen
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+                duration: const Duration(milliseconds: 180),
+                sizeCurve: Curves.easeOut,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -1935,3 +1989,4 @@ class _TopicPill extends StatelessWidget {
     );
   }
 }
+
