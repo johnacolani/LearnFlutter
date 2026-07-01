@@ -15,23 +15,24 @@ class FlutterInterviewPrepApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = ColorScheme.fromSeed(
-      seedColor: const Color(0xFF4F6AF0),
-      brightness: Brightness.dark,
+      seedColor: const Color(0xFF57534E),
+      brightness: Brightness.light,
     );
 
     return MaterialApp(
       title: 'Flutter Interview Prep',
       debugShowCheckedModeBanner: false,
+      themeMode: ThemeMode.light,
       scrollBehavior: const _AppScrollBehavior(),
       theme: ThemeData(
         useMaterial3: true,
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0F1117),
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: const Color(0xFFF8FBFF),
         colorScheme: scheme,
         visualDensity: VisualDensity.adaptivePlatformDensity,
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF121826),
-          foregroundColor: Color(0xFFF7FAFC),
+          backgroundColor: Color(0xFFF3F8FF),
+          foregroundColor: Color(0xFF0F172A),
           centerTitle: false,
         ),
       ),

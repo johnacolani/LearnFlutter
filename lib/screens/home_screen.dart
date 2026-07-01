@@ -11,66 +11,66 @@ const List<double> kFontSteps = [0.85, 1.0, 1.15, 1.3, 1.45];
 
 enum AnswerMode { shortAnswer, detailedAnswer, interviewAnswer }
 
+const int kUiPaletteVersion = 2;
+
+const int kDefaultTextColor = 0xFF0F172A;
+const int kDefaultBackgroundColor = 0xFFF8FBFF;
+const int kDefaultCardColor = 0xFFFFFFFF;
+const int kDefaultHeaderColor = 0xFFE0F2FE;
+const int kDefaultFooterColor = 0xFFFEF3C7;
+
 const List<int> kTextColorOptions = [
-  0xFFF7FAFC,
-  0xFF000000,
-  0xFFFFFFFF,
-  0xFF1A202C,
-  0xFF2D3748,
-  0xFFE53E3E,
-  0xFFDD6B20,
-  0xFFD69E2E,
-  0xFF38A169,
-  0xFF3182CE,
-  0xFF805AD5,
-  0xFFD53F8C,
+  0xFF0F172A,
+  0xFF1E293B,
+  0xFF334155,
+  0xFF2563EB,
+  0xFF0891B2,
+  0xFF16A34A,
+  0xFFF97316,
+  0xFFDB2777,
 ];
 
 const List<int> kBackgroundColorOptions = [
-  0xFF0F1117,
   0xFFFFFFFF,
-  0xFFF7FAFC,
-  0xFFEDF2F7,
-  0xFF1A202C,
-  0xFF000000,
-  0xFF1A1F2E,
-  0xFF102A43,
-  0xFF1C4532,
-  0xFF3C2A1E,
-  0xFF2D1B45,
-  0xFF742A2A,
+  0xFFF8FBFF,
+  0xFFFFF8E8,
+  0xFFEFFBFF,
+  0xFFF5F7FF,
+  0xFFF4FFF6,
+  0xFFFFF2F2,
+  0xFFE8F1FF,
+  0xFFFFF5EB,
+  0xFFEFFAF7,
+  0xFFFFF0F7,
 ];
 
 const List<int> kCardColorOptions = [
-  0xFF1A202C,
   0xFFFFFFFF,
-  0xFFF7FAFC,
-  0xFFEDF2F7,
-  0xFF0F1117,
-  0xFF000000,
-  0xFF102A43,
-  0xFF1C4532,
-  0xFF3C2A1E,
-  0xFF2D1B45,
-  0xFF742A2A,
-  0xFF2B6CB0,
+  0xFFFFFBF3,
+  0xFFF8FCFF,
+  0xFFF3F7FF,
+  0xFFFFF8F1,
+  0xFFEEF7FF,
+  0xFFF5FFF7,
+  0xFFFFF2F6,
+  0xFFFDFDFD,
+  0xFFFFFDF0,
+  0xFFEFFBF3,
+  0xFFF6F0FF,
 ];
 
 const List<int> kSectionColorOptions = [
-  0xFF1A1F2E,
-  0xFF0F1117,
-  0xFF1A202C,
   0xFFFFFFFF,
-  0xFFF7FAFC,
-  0xFFEDF2F7,
-  0xFF000000,
-  0xFF102A43,
-  0xFF1C4532,
-  0xFF3C2A1E,
-  0xFF2D1B45,
-  0xFF742A2A,
-  0xFF2B6CB0,
-  0xFF805AD5,
+  0xFFFEF3C7,
+  0xFFE0F2FE,
+  0xFFFDE68A,
+  0xFFFBCFE8,
+  0xFFCFFAFE,
+  0xFFC7F9CC,
+  0xFFBAE6FD,
+  0xFFFECACA,
+  0xFFFCE7F3,
+  0xFFE9D5FF,
 ];
 
 class HomeScreen extends StatefulWidget {
@@ -109,11 +109,11 @@ class _HomeScreenState extends State<HomeScreen> {
   bool interviewMode = false;
   bool showInterviewAnswer = false;
   double windowOpacity = 0.82;
-  int textColorValue = 0xFFF7FAFC;
-  int backgroundColorValue = 0xFF0F1117;
-  int cardColorValue = 0xFF1A202C;
-  int headerColorValue = 0xFF1A1F2E;
-  int footerColorValue = 0xFF1A202C;
+  int textColorValue = kDefaultTextColor;
+  int backgroundColorValue = kDefaultBackgroundColor;
+  int cardColorValue = kDefaultCardColor;
+  int headerColorValue = kDefaultHeaderColor;
+  int footerColorValue = kDefaultFooterColor;
   String searchQuery = '';
   _VisiblePoint? interviewPoint;
   final Set<String> favorites = <String>{};
@@ -132,24 +132,40 @@ class _HomeScreenState extends State<HomeScreen> {
   Color get cardColor => Color(cardColorValue);
   Color get headerColor => Color(headerColorValue);
   Color get footerColor => Color(footerColorValue);
-  Color get cardSectionColor => Color.lerp(cardColor, backgroundColor, 0.18)!;
-  Color get cardCodeColor => Color.lerp(cardColor, Colors.black, 0.22)!;
-  Color get cardBorderColor => textColor.withValues(alpha: 0.18);
+  Color get cardSectionColor => Color.lerp(cardColor, backgroundColor, 0.22)!;
+  Color get cardCodeColor =>
+      Color.lerp(cardColor, const Color(0xFFE0F2FE), 0.42)!;
+  Color get cardBorderColor => textColor.withValues(alpha: 0.10);
   Color get menuSurfaceColor => backgroundColor;
   Color get controlSurfaceColor =>
-      Color.lerp(backgroundColor, textColor, 0.10)!;
-  Color get controlBorderColor => textColor.withValues(alpha: 0.18);
+      Color.lerp(backgroundColor, cardColor, 0.72)!;
+  Color get controlBorderColor => textColor.withValues(alpha: 0.10);
   Color get secondaryTextColor => textColor.withValues(alpha: 0.72);
   Color get mutedTextColor => textColor.withValues(alpha: 0.52);
-  Color get buttonSurfaceColor => const Color(0xFF4A5568);
-  Color get buttonBorderColor => Colors.white.withValues(alpha: 0.92);
-  Color get buttonTextColor => Colors.white;
+  Color get buttonSurfaceColor => const Color(0xFFF1F5F9);
+  Color get buttonBorderColor => const Color(0xFFCBD5E1);
+  Color get buttonTextColor => const Color(0xFF0F172A);
+
+  bool _isDarkSurface(int? value) {
+    if (value == null) return true;
+    return Color(value).computeLuminance() < 0.38;
+  }
+
+  bool _shouldResetToBrightPalette(SharedPreferences prefs) {
+    final paletteVersion = prefs.getInt('uiPaletteVersion') ?? 0;
+    if (paletteVersion < kUiPaletteVersion) return true;
+
+    return _isDarkSurface(prefs.getInt('backgroundColorValue')) ||
+        _isDarkSurface(prefs.getInt('cardColorValue')) ||
+        _isDarkSurface(prefs.getInt('headerColorValue')) ||
+        _isDarkSurface(prefs.getInt('footerColorValue'));
+  }
 
   ButtonStyle get iconButtonStyle => IconButton.styleFrom(
         backgroundColor: buttonSurfaceColor,
         foregroundColor: buttonTextColor,
-        disabledBackgroundColor: const Color(0xFF2D3748),
-        disabledForegroundColor: Colors.white.withValues(alpha: 0.38),
+        disabledBackgroundColor: const Color(0xFFE2E8F0),
+        disabledForegroundColor: const Color(0xFF94A3B8),
         side: BorderSide(color: buttonBorderColor),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
       );
@@ -190,15 +206,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadPrefs() async {
     final prefs = await SharedPreferences.getInstance();
+    final shouldResetToBright = _shouldResetToBrightPalette(prefs);
+
     setState(() {
       fontStepIndex = prefs.getInt('fontStepIndex') ?? fontStepIndex;
       windowOpacity = prefs.getDouble('windowOpacity') ?? windowOpacity;
-      textColorValue = prefs.getInt('textColorValue') ?? textColorValue;
-      backgroundColorValue =
-          prefs.getInt('backgroundColorValue') ?? backgroundColorValue;
-      cardColorValue = prefs.getInt('cardColorValue') ?? cardColorValue;
-      headerColorValue = prefs.getInt('headerColorValue') ?? headerColorValue;
-      footerColorValue = prefs.getInt('footerColorValue') ?? footerColorValue;
+      if (shouldResetToBright) {
+        textColorValue = kDefaultTextColor;
+        backgroundColorValue = kDefaultBackgroundColor;
+        cardColorValue = kDefaultCardColor;
+        headerColorValue = kDefaultHeaderColor;
+        footerColorValue = kDefaultFooterColor;
+      } else {
+        textColorValue = prefs.getInt('textColorValue') ?? textColorValue;
+        backgroundColorValue =
+            prefs.getInt('backgroundColorValue') ?? backgroundColorValue;
+        cardColorValue = prefs.getInt('cardColorValue') ?? cardColorValue;
+        headerColorValue = prefs.getInt('headerColorValue') ?? headerColorValue;
+        footerColorValue = prefs.getInt('footerColorValue') ?? footerColorValue;
+      }
       favorites
         ..clear()
         ..addAll(prefs.getStringList('favorites') ?? const []);
@@ -220,6 +246,15 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
     });
+
+    if (shouldResetToBright) {
+      await prefs.setInt('uiPaletteVersion', kUiPaletteVersion);
+      await prefs.setInt('textColorValue', textColorValue);
+      await prefs.setInt('backgroundColorValue', backgroundColorValue);
+      await prefs.setInt('cardColorValue', cardColorValue);
+      await prefs.setInt('headerColorValue', headerColorValue);
+      await prefs.setInt('footerColorValue', footerColorValue);
+    }
   }
 
   Future<void> _savePrefs() async {
@@ -231,6 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
     await prefs.setInt('cardColorValue', cardColorValue);
     await prefs.setInt('headerColorValue', headerColorValue);
     await prefs.setInt('footerColorValue', footerColorValue);
+    await prefs.setInt('uiPaletteVersion', kUiPaletteVersion);
     await prefs.setStringList('favorites', favorites.toList());
     await prefs.setStringList('confidence',
         confidence.entries.map((e) => '${e.key}|${e.value}').toList());
@@ -839,13 +875,13 @@ class _HomeScreenState extends State<HomeScreen> {
                             searchQuery = '';
                           })),
               filled: true,
-              fillColor: const Color(0xFF1A202C),
+              fillColor: cardColor,
               border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF2D3748))),
+                  borderSide: BorderSide(color: cardBorderColor)),
               enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: Color(0xFF2D3748))),
+                  borderSide: BorderSide(color: cardBorderColor)),
             ),
           ),
         ),
@@ -1039,7 +1075,7 @@ class _HomeScreenState extends State<HomeScreen> {
             border: Border.all(color: buttonBorderColor),
             borderRadius: BorderRadius.circular(7)),
         child: Stack(alignment: Alignment.center, children: [
-          Icon(icon, size: 17, color: selectedColor),
+          Icon(icon, size: 17, color: buttonTextColor),
           Positioned(
               bottom: 5,
               child: Container(
@@ -1057,17 +1093,16 @@ class _HomeScreenState extends State<HomeScreen> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 180),
       decoration: BoxDecoration(
-          color:
-              stickerMode ? const Color(0x22148A5D) : const Color(0xFF141A26),
+          color: stickerMode
+              ? const Color(0xFFE6FFFB)
+              : Color.lerp(cardColor, const Color(0xFFE0F2FE), 0.72)!,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-              color: stickerMode
-                  ? const Color(0xFF38A169)
-                  : const Color(0xFF2D3748))),
+              color: stickerMode ? const Color(0xFF10B981) : cardBorderColor)),
       padding: const EdgeInsets.all(12),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Row(children: [
-          const Icon(Icons.push_pin, size: 18, color: Color(0xFFCBD5E0)),
+          const Icon(Icons.push_pin, size: 18, color: Color(0xFF0EA5E9)),
           const SizedBox(width: 8),
           Expanded(
               child: Text('Desktop Sticker Mode',
@@ -1189,9 +1224,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-            color: const Color(0xFF1A202C),
+            color: cardSectionColor,
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: const Color(0xFF2D3748))),
+            border: Border.all(color: cardBorderColor)),
         child: Text(text,
             style: TextStyle(
                 fontSize: fs(12.5),
@@ -1255,9 +1290,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-          gradient: LinearGradient(
-              colors: [color.withOpacity(0.16), color.withOpacity(0.04)]),
-          border: Border.all(color: color.withOpacity(0.32)),
+          gradient: LinearGradient(colors: [
+            color.withValues(alpha: 0.16),
+            color.withValues(alpha: 0.04),
+          ]),
+          border: Border.all(color: color.withValues(alpha: 0.32)),
           borderRadius: BorderRadius.circular(16)),
       padding: const EdgeInsets.all(16),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -1313,9 +1350,9 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.only(top: 0),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-          color: const Color(0xFF1A202C),
+          color: headerColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF805AD5))),
+          border: Border.all(color: buttonBorderColor)),
       child: Wrap(
           spacing: 10,
           runSpacing: 10,
@@ -1375,12 +1412,14 @@ class _HomeScreenState extends State<HomeScreen> {
       decoration: BoxDecoration(
           color: cardColor,
           border: Border.all(
-              color: isOpen ? topicColor.withOpacity(0.48) : cardBorderColor),
+              color: isOpen
+                  ? topicColor.withValues(alpha: 0.48)
+                  : cardBorderColor),
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             if (isOpen)
               BoxShadow(
-                  color: topicColor.withOpacity(0.08),
+                  color: topicColor.withValues(alpha: 0.08),
                   blurRadius: 20,
                   offset: const Offset(0, 8))
           ]),
@@ -1402,7 +1441,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                  color: topicColor.withOpacity(0.2),
+                                  color: topicColor.withValues(alpha: 0.2),
                                   shape: BoxShape.circle),
                               child: Center(
                                   child: Text('${displayIndex + 1}',
@@ -1434,8 +1473,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               tooltip: 'Favorite',
                               icon: Icon(isFav ? Icons.star : Icons.star_border,
                                   color: isFav
-                                      ? const Color(0xFFF6E05E)
-                                      : const Color(0xFF718096)),
+                                      ? const Color(0xFFF59E0B)
+                                      : mutedTextColor),
                               onPressed: () => _toggleFavorite(row.id)),
                           IconButton(
                               style: iconButtonStyle,
@@ -1447,8 +1486,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ? Icons.stop_circle_outlined
                                       : Icons.record_voice_over_outlined,
                                   color: isSpeaking
-                                      ? const Color(0xFF38A169)
-                                      : const Color(0xFF718096)),
+                                      ? const Color(0xFF10B981)
+                                      : mutedTextColor),
                               onPressed: () {
                                 _toggleReadAloud(row);
                               }),
@@ -1457,7 +1496,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 isOpen
                                     ? Icons.keyboard_arrow_up
                                     : Icons.keyboard_arrow_down,
-                                color: const Color(0xFF718096)),
+                                color: mutedTextColor),
                         ])))),
         AnimatedCrossFade(
             firstChild: const SizedBox.shrink(),
@@ -1571,7 +1610,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Row(children: [
           Icon(Icons.record_voice_over_outlined,
               size: 20,
-              color: isSpeaking ? const Color(0xFF38A169) : secondaryTextColor),
+              color: isSpeaking ? const Color(0xFF10B981) : secondaryTextColor),
           const SizedBox(width: 10),
           Expanded(
               child: Text(
@@ -1618,9 +1657,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
                 onPressed: () => _setConfidence(id, i),
                 icon: Icon(i <= conf ? Icons.star : Icons.star_border,
-                    color: i <= conf
-                        ? const Color(0xFFF6E05E)
-                        : const Color(0xFF718096))),
+                    color:
+                        i <= conf ? const Color(0xFFF59E0B) : mutedTextColor)),
         ]);
   }
 
@@ -1819,7 +1857,7 @@ class _TopicTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = Color(topic.colorValue);
     return Material(
-      color: isActive ? color.withOpacity(0.18) : Colors.transparent,
+      color: isActive ? color.withValues(alpha: 0.18) : Colors.transparent,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -1828,7 +1866,9 @@ class _TopicTile extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-                color: isActive ? color.withOpacity(0.7) : Colors.transparent),
+                color: isActive
+                    ? color.withValues(alpha: 0.7)
+                    : Colors.transparent),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
           child: Row(children: [
@@ -1866,26 +1906,32 @@ class _TopicPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     final color = Color(topic.colorValue);
     return Material(
-        color: isActive ? color : const Color(0xFF1A202C),
+      color: isActive ? color : colors.surface,
+      borderRadius: BorderRadius.circular(999),
+      child: InkWell(
         borderRadius: BorderRadius.circular(999),
-        child: InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
-            onTap: onTap,
-            child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                        color: isActive ? color : const Color(0xFF2D3748))),
-                child: Text('${topic.icon} ${topic.label}',
-                    style: TextStyle(
-                        fontSize: fs(13.5),
-                        fontWeight: FontWeight.w700,
-                        color: isActive
-                            ? Colors.white
-                            : const Color(0xFFA0AEC0))))));
+            border: Border.all(
+              color: isActive ? color : colors.outlineVariant,
+            ),
+          ),
+          child: Text(
+            '${topic.icon} ${topic.label}',
+            style: TextStyle(
+              fontSize: fs(13.5),
+              fontWeight: FontWeight.w700,
+              color: isActive ? Colors.white : colors.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

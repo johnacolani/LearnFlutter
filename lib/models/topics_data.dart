@@ -58,7 +58,7 @@ class AppTrack {
 }
 
 final List<Topic> kTopics = [
-  Topic(
+  const Topic(
     id: r"""dart""",
     label: r"""Dart Core""",
     icon: r"""🎯""",
@@ -127,7 +127,7 @@ a == b;          // equal by value?""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""async""",
     label: r"""Async""",
     icon: r"""⏳""",
@@ -190,7 +190,7 @@ CPU-heavy work → Isolate / compute""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""memory""",
     label: r"""Memory""",
     icon: r"""🧠""",
@@ -255,7 +255,7 @@ Navigator.pop(context);""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""flutter_arch""",
     label: r"""Flutter Architecture""",
     icon: r"""🏗️""",
@@ -322,7 +322,7 @@ React Native: native component mapping""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""dev_commands""",
     label: r"""Flutter CLI / Dev Commands""",
     icon: r"""???""",
@@ -449,7 +449,7 @@ dart run build_runner watch --delete-conflicting-outputs""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""wer""",
     label: r"""Widget / Element / RenderObject""",
     icon: r"""🧩""",
@@ -534,7 +534,7 @@ RenderObject: expensive rendering""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""lifecycle""",
     label: r"""Lifecycle""",
     icon: r"""🔁""",
@@ -644,7 +644,7 @@ setState(() {});""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""context""",
     label: r"""BuildContext""",
     icon: r"""📍""",
@@ -702,7 +702,7 @@ setState(() {});""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""rendering""",
     label: r"""Rendering Pipeline""",
     icon: r"""🎨""",
@@ -778,7 +778,7 @@ Semantics: add missing meaning""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""state""",
     label: r"""State Management""",
     icon: r"""🧭""",
@@ -868,7 +868,7 @@ Riverpod: ref.watch(authProvider)""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""app_arch""",
     label: r"""Clean Architecture""",
     icon: r"""🏛️""",
@@ -952,7 +952,7 @@ Large app: separate concerns""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""firebase""",
     label: r"""Firebase""",
     icon: r"""🔥""",
@@ -1010,7 +1010,7 @@ Large app: separate concerns""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""realtime""",
     label: r"""Realtime""",
     icon: r"""📡""",
@@ -1067,7 +1067,7 @@ WebSocket: server pushes""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""native""",
     label: r"""Native Integration""",
     icon: r"""🔌""",
@@ -1141,7 +1141,7 @@ Kotlin/Swift SDK only -> plugin/channel""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""performance""",
     label: r"""Performance""",
     icon: r"""⚡""",
@@ -1199,7 +1199,7 @@ Kotlin/Swift SDK only -> plugin/channel""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""plugin""",
     label: r"""Desktop Plugin""",
     icon: r"""🪟""",
@@ -1279,7 +1279,7 @@ runApp(const FlutterInterviewPrepApp());""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""4icad""",
     label: r"""4iCAD Story""",
     icon: r"""📐""",
@@ -1338,7 +1338,7 @@ runApp(const FlutterInterviewPrepApp());""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""app_optimization""",
     label: r"""App Optimization""",
     icon: r"""OPT""",
@@ -1420,7 +1420,7 @@ Spatial index -> fast hit testing""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""app_security""",
     label: r"""App Security""",
     icon: r"""SEC""",
@@ -1497,7 +1497,7 @@ Sensitive offline data -> encrypted database + cleanup""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""design_system""",
     label: r"""Design System""",
     icon: r"""DS""",
@@ -1578,7 +1578,7 @@ PrimaryButton default/disabled/loading states""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""oop_solid""",
     label: r"""OOP & SOLID""",
     icon: r"""OOP""",
@@ -1663,7 +1663,7 @@ Good: AuthRepository + ProfileRepository + AvatarUploader""",
       ),
     ],
   ),
-  Topic(
+  const Topic(
     id: r"""testing""",
     label: r"""Testing""",
     icon: r"""TEST""",
