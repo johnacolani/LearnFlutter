@@ -7,6 +7,7 @@ import 'services/window_transparency/window_transparency.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await WindowTransparencyService.initialize();
+  debugPrint("========== App Started ==========");
   runApp(const FlutterInterviewPrepApp());
 }
 
